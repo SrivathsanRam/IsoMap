@@ -1,78 +1,46 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "../context/AuthContext";
-import { LoginPage } from "../components/Auth/LoginPage";
-import { Layout } from "../components/Navigation/Layout";
+import { useState, type FormEvent } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Map } from "./components/Map";
 
+type Mode = "login" | "signup";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+function Auth() {
+  const [mode, setMode] = useState<Mode>("login");
+  const navigate = useNavigate();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    navigate("/map");
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Layout>{children}</Layout>;
-}
-
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/topics" replace />;
-  }
-
-  return <>{children}</>;
-}
-
-function AppRoutes() {
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Navigate to="/topics" replace />
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <main className="auth">
+      <form onSubmit={submit}>
+        <h1>IsoMap</h1>
+        <div className="tabs">
+          <button type="button" onClick={() => setMode("login")}>
+            Log in
+          </button>
+          <button type="button" onClick={() => setMode("signup")}>
+            Sign up
+          </button>
+        </div>
+        <input placeholder="Username" required />
+        <input placeholder="Password" type="password" required />
+        <button>{mode === "login" ? "Log in" : "Sign up"}</button>
+      </form>
+    </main>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <Routes>
+        <Route path="/" element={<Auth />} />
+        <Route path="/map" element={<Map />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
