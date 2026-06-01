@@ -14,6 +14,8 @@
 
 - [Technical Proof of Concept](#Technical-Proof-of-Concept)
 
+- [Proposed LOA](#Proposed-Level-of-Achievement)
+
 - [Tech Stack](#Tech-Stack)
 - [SWE Practices](#Software-Engineering-Practices)
 
@@ -48,6 +50,10 @@ But daily commuting is more than a race to the destination.
 
 ### Travel-Time Proximity 
 To answer the question of "What can I reach within 20 mins by bus?" We first tried implementing a polygon of places we can reach done in the demo video.
+
+---
+### Proposed Level of Achievement
+Level of Achievement: Apollo
 
 ---
 ## Tech Stack
