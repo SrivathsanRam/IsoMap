@@ -1,21 +1,5 @@
-
 # **ISOMAP (NUS Orbital 2026)**
-
-An application developed to bring more to travel to make it more enjoyable and fruitful by integrating exploration and discovery not only for a sole user.
-
-*~ Ken Tay, Srivathsan Ram*
-
---- 
-
-## Contents
-
-- [Project Overview](#Project Overview)
-
-
-
-## Project Overview
-# **ISOMAP (NUS Orbital 2026)**
-*~ Ken Tay, Srivathsan Ram*
+~ Ken Tay, Srivathsan Ram
 
 --- 
 
