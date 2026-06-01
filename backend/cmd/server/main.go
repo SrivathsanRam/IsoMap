@@ -13,9 +13,13 @@ import (
 func main() {
 	loadEnv()
 	r := router.Setup()
-	fmt.Print("Listening on port 8000 at http://localhost:8000!")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
 
-	log.Fatalln(http.ListenAndServe(":8000", r))
+	fmt.Printf("Listening on port %s\n", port)
+	log.Fatalln(http.ListenAndServe(":"+port, r))
 }
 
 func loadEnv() {

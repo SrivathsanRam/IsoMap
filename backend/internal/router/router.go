@@ -24,6 +24,9 @@ func cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		frontendURL := strings.TrimRight(os.Getenv("FRONTEND_ORIGIN"), "/")
 		if frontendURL == "" {
+			frontendURL = strings.TrimRight(os.Getenv("FRONTEND_URL"), "/")
+		}
+		if frontendURL == "" {
 			frontendURL = "http://localhost:5173"
 		}
 

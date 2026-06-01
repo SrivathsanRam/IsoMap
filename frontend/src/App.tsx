@@ -20,18 +20,23 @@ function Auth({ mode }: { mode: Mode }) {
       return;
     }
 
-    const response = await fetch(`${api}/${mode}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: form.get("username"),
-        password: form.get("password"),
-      }),
-    });
+    try {
+      const response = await fetch(`${api}/${mode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: form.get("username"),
+          password: form.get("password"),
+        }),
+      });
 
-    if (!response.ok) {
-      const data = await response.json();
-      setError(data.message);
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.message);
+        return;
+      }
+    } catch {
+      setError("Could not reach backend");
       return;
     }
 
