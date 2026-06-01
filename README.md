@@ -1,30 +1,27 @@
 # **ISOMAP (NUS Orbital 2026)**
-~ Ken Tay, Srivathsan Ram
+~ Ken Tay Yao Hui, Srivathsan Ram
 
 --- 
 
 ## Table of Contents
 
 - [Project Overview](#Project-Overview)
-- [Proof of Concept](#Proof-of-Concept)
-
 - [Aim](#Aim)
 - [Motivation](#Motivation)
 
-- [Timeline and Development Plan](#Timeline-and-Developement-Plan)
+- [Proof of Concept](#Proof-of-Concept)
+
+- [Proposed Core Features](#Proposed-Core-Features)
+
+- [Timeline and Development Plan](# Timeline-and-Development-Plan)
 
 ---
 ## Project Overview
 An application developed to bring more to travel to make it more enjoyable and fruitful by integrating exploration and discovery not only for a sole user.
 
-
----
-## Proof-of-Concept
-
-
 ---
 ## Aim
-We aim to not just help users get to their destination, we want to help them make the most of their journey.
+We aim to help users get to their destination and make the most of their journey.
 
 --- 
 ## Motivation
@@ -32,6 +29,17 @@ Modern navigation tools such as Google Maps Platform are excellent at computing 
 
 But daily commuting is more than a race to the destination.
 
+--- 
+## Proposed Core Features
+- Smart Navigation and Basic Routing
+- Travel-Time Proximity 
+- Group Planning
+- Exploration Feature
+
+---
+## Proof-of-Concept
+
+# Travel-Time Proximity 
 
 --- 
 ## Timeline and Development Plan
