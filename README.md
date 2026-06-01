@@ -13,7 +13,7 @@
 
 - [Proposed Core Features](#Proposed-Core-Features)
 
-- [Timeline and Development Plan](# Timeline-and-Development-Plan)
+- [Timeline and Development Plan](#Timeline-and-Development-Plan)
 
 ---
 ## Project Overview
