@@ -38,6 +38,11 @@ form {
   width: min(360px, 100%);
 }
 
+.error {
+  color: #b42318;
+  margin: 0;
+}
+
 .tabs,
 header {
   display: flex;

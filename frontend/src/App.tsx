@@ -1,15 +1,40 @@
-import { type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Map } from "./components/Map";
 
 type Mode = "login" | "signup";
+const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 function Auth({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
   const isSignup = mode === "signup";
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
+
+    const form = new FormData(event.currentTarget);
+    if (isSignup && form.get("password") !== form.get("confirmPassword")) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    const response = await fetch(`${api}/${mode}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: form.get("username"),
+        password: form.get("password"),
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      setError(data.message);
+      return;
+    }
+
     navigate("/map");
   }
 
@@ -25,10 +50,16 @@ function Auth({ mode }: { mode: Mode }) {
             Sign up
           </button>
         </div>
-        <input placeholder="Username" required />
-        <input placeholder="Password" type="password" required />
+        {error && <p className="error">{error}</p>}
+        <input name="username" placeholder="Username" required />
+        <input name="password" placeholder="Password" type="password" required />
         {isSignup && (
-          <input placeholder="Confirm password" type="password" required />
+          <input
+            name="confirmPassword"
+            placeholder="Confirm password"
+            type="password"
+            required
+          />
         )}
         <button>{isSignup ? "Sign up" : "Log in"}</button>
       </form>
