@@ -1,10 +1,19 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { SearchBar, type Place } from "./SearchBar";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const singapore: L.LatLngExpression = [1.3521, 103.8198];
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 type Point = {
   lat: number;
