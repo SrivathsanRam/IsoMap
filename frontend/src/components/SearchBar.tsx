@@ -20,6 +20,7 @@ export function SearchBar({ onSelect }: SearchBarProps) {
     }
 
     const controller = new AbortController();
+    // debouncing the search input to avoid timing out API
     const timeout = window.setTimeout(async () => {
       try {
         const params = new URLSearchParams({

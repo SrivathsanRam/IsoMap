@@ -27,6 +27,10 @@ button {
   padding: 24px;
 }
 
+.screen {
+  position: relative;
+}
+
 .auth {
   display: grid;
   place-items: center;
@@ -51,7 +55,7 @@ header {
   justify-content: space-between;
 }
 
-iframe {
+.map {
   width: 100%;
   height: calc(100vh - 48px);
   border: 1px solid #cfd8dc;
@@ -63,7 +67,7 @@ iframe {
   position: absolute;
   top: 48px;
   width: min(420px, calc(100% - 96px));
-  z-index: 1;
+  z-index: 1000;
 }
 
 .map-search input,

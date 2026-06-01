@@ -1,28 +1,75 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { SearchBar, type Place } from "./SearchBar";
 
-const singaporeMap =
-  "https://www.openstreetmap.org/export/embed.html?bbox=103.5935%2C1.1304%2C104.1076%2C1.4756&layer=mapnik";
+const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const singapore: L.LatLngExpression = [1.3521, 103.8198];
 
-function mapUrl(place: Place) {
-  const lat = Number(place.lat);
-  const lon = Number(place.lon);
-  const pad = 0.01;
-
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${lon - pad}%2C${lat - pad}%2C${lon + pad}%2C${lat + pad}&layer=mapnik&marker=${lat}%2C${lon}`;
-}
+type Point = {
+  lat: number;
+  lon: number;
+};
 
 export function Map() {
-  const [src, setSrc] = useState(singaporeMap);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const polygonRef = useRef<L.Polygon | null>(null);
 
-  function select(place: Place) {
-    setSrc(mapUrl(place));
+  useEffect(() => {
+    if (!elementRef.current || mapRef.current) {
+      return;
+    }
+
+    const map = L.map(elementRef.current).setView(singapore, 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  async function select(place: Place) {
+    const lat = Number(place.lat);
+    const lon = Number(place.lon);
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
+    map.setView([lat, lon], 15);
+    markerRef.current?.remove();
+    markerRef.current = L.marker([lat, lon]).addTo(map);
+
+    const response = await fetch(`${api}/isochrone`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat, lon }),
+    });
+    if (!response.ok) {
+      return;
+    }
+    const points = (await response.json()) as Point[];
+    const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
+
+    polygonRef.current?.remove();
+    polygonRef.current = L.polygon(polygon, {
+      color: "#2563eb",
+      fillColor: "#60a5fa",
+      fillOpacity: 0.25,
+    }).addTo(map);
+    map.fitBounds(polygonRef.current.getBounds());
   }
 
   return (
     <main className="screen">
       <SearchBar onSelect={select} />
-      <iframe title="OpenStreetMap Singapore" src={src} />
+      <div ref={elementRef} className="map" />
     </main>
   );
 }
