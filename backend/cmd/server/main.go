@@ -19,7 +19,22 @@ func main() {
 }
 
 func loadEnv() {
-	for _, path := range []string{".env", "backend/.env"} {
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = os.Getenv("GO_ENV")
+	}
+	if env == "" {
+		env = "development"
+	}
+
+	paths := []string{
+		".env." + env,
+		"backend/.env." + env,
+		".env",
+		"backend/.env",
+	}
+
+	for _, path := range paths {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
