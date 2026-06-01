@@ -39,7 +39,8 @@ But daily commuting is more than a race to the destination.
 ---
 ## Proof-of-Concept
 
-# Travel-Time Proximity 
+### Travel-Time Proximity 
+To answer the question of "What can I reach within 20 mins by bus?" We first tried implementing a polygon of places we can reach done in the demo video.
 
 --- 
 ## Timeline and Development Plan
