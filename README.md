@@ -8,10 +8,14 @@
 - [Project Overview](#Project-Overview)
 - [Aim](#Aim)
 - [Motivation](#Motivation)
-
-- [Proof of Concept](#Proof-of-Concept)
-
+- [User Stories](#User-Stories)
+  
 - [Proposed Core Features](#Proposed-Core-Features)
+
+- [Technical Proof of Concept](#Technical-Proof-of-Concept)
+
+- [Tech Stack](#Tech-Stack)
+- [SWE Practices](#Software-Engineering-Practices)
 
 - [Timeline and Development Plan](#Timeline-and-Development-Plan)
 
@@ -29,6 +33,9 @@ Modern navigation tools such as Google Maps Platform are excellent at computing 
 
 But daily commuting is more than a race to the destination.
 
+---
+## User Stories
+
 --- 
 ## Proposed Core Features
 - Smart Navigation and Basic Routing
@@ -37,10 +44,19 @@ But daily commuting is more than a race to the destination.
 - Exploration Feature
 
 ---
-## Proof-of-Concept
+## Technical Proof-of-Concept
 
 ### Travel-Time Proximity 
 To answer the question of "What can I reach within 20 mins by bus?" We first tried implementing a polygon of places we can reach done in the demo video.
+
+---
+## Tech Stack
+-React (front-end)
+- Go (using GORM and Gin)
+- Postgres (database)
+
+--- 
+## Software Engineering Practices
 
 --- 
 ## Timeline and Development Plan
