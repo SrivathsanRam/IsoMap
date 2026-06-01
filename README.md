@@ -57,7 +57,7 @@ Level of Achievement: Apollo
 
 ---
 ## Tech Stack
--React (front-end)
+- React (front-end)
 - Go (using GORM and Gin)
 - Postgres (database)
 
