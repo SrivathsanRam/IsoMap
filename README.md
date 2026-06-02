@@ -49,7 +49,11 @@ But daily commuting is more than a race to the destination.
 ## Technical Proof-of-Concept
 
 ### Travel-Time Proximity 
-To answer the question of "What can I reach within 20 mins by bus?" We first tried implementing a polygon of places we can reach done in the demo video.
+To answer the question of "What can I reach within 20 mins by bus?" 
+
+To prove that we can obtain a specific range that a person can reach, we first tried to obtain a range of locations that can be reached from a point
+
+This helps us believe that a specific range can then be obtained by filtering the possible routes out slowly one by one 
 
 ---
 ### Proposed Level of Achievement
@@ -63,6 +67,19 @@ Level of Achievement: Apollo
 
 --- 
 ## Software Engineering Practices
+
+### Workflow & Tools
+- Version Control by utilising repositories and branching in github
+
+### Code Quality * Maintenance
+- Maintaining clear separation of concerns between data access, middleware, controller and route layers
+- Creating reusable components in React
+
+### Development Strategy 
+- Commenting Code and keeping files well documented in the README
+
+### Testing & Reliability
+- Unit Testing, Automated Testing
 
 --- 
 ## Timeline and Development Plan
