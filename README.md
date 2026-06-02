@@ -38,6 +38,14 @@ But daily commuting is more than a race to the destination.
 ---
 ## User Stories
 
+As a commuter
+
+
+As a Group of friends
+
+
+As a tourist
+
 --- 
 ## Proposed Core Features
 - Smart Navigation and Basic Routing
@@ -47,6 +55,9 @@ But daily commuting is more than a race to the destination.
 
 ---
 ## Technical Proof-of-Concept
+
+### Basic Routing
+To answer the question of "What is the best route to get from point A to B?"
 
 ### Travel-Time Proximity 
 To answer the question of "What can I reach within 20 mins by bus?" 
