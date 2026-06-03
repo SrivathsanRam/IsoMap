@@ -38,13 +38,11 @@ But daily commuting is more than a race to the destination.
 ---
 ## User Stories
 
-As a commuter
+As a daily commuter, I would be travelling the same route everyday but I would want to find routes that would be both convenient and make the trip more enjoyable since it is routine. Instead of looking up for deals online on apps like Grab or Instagram an app to help centralise all in one place instead of switching between multiple apps.
 
+As a Group of friends, we would want to plan a place to meet up but where we meet would not be the best for everyone as some people would need to travel more than others and if the "middle" location is not a place any of us have visited before we would not know what is there so an app to help locate the best middle-point and list out nearby places of interest for us.
 
-As a Group of friends
-
-
-As a tourist
+As a tourist, when I am in a country and I am unfamilar with the area I would like to know what places I can go to for my own leisure that is not sourced only from social media as content from platforms like tiktok may be repetitive.
 
 --- 
 ## Proposed Core Features
@@ -82,7 +80,7 @@ Level of Achievement: Apollo
 ### Workflow & Tools
 - Version Control by utilising repositories and branching in github
 
-### Code Quality * Maintenance
+### Code Quality & Maintenance
 - Maintaining clear separation of concerns between data access, middleware, controller and route layers
 - Creating reusable components in React
 
