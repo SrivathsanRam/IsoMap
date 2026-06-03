@@ -67,6 +67,10 @@ As a Tourist, I want to discover places that are accessible from my current loca
 ### Basic Routing
 To answer the question of "What is the best route to get from point A to B?"
 
+To prove that we can obtain the optimal route to a place we first used a supporting software OSRM to help identify the optimal route and then we forward the data to the front-end
+
+This helps us to prove that we can obtain the optimal route and provide it to the client.
+
 ### Travel-Time Proximity 
 To answer the question of "What can I reach within 20 mins by bus?" 
 
