@@ -38,11 +38,13 @@ But daily commuting is more than a race to the destination.
 ---
 ## User Stories
 
-As a daily commuter, I would be travelling the same route everyday but I would want to find routes that would be both convenient and make the trip more enjoyable since it is routine. Instead of looking up for deals online on apps like Grab or Instagram an app to help centralise all in one place instead of switching between multiple apps.
+As a Daily Commuter, I want to discover deals and possible pitstops along my regular route so that I can make my daily commute more fulfilling or enjoyable instead of a mundane routine.
 
-As a Group of friends, we would want to plan a place to meet up but where we meet would not be the best for everyone as some people would need to travel more than others and if the "middle" location is not a place any of us have visited before we would not know what is there so an app to help locate the best middle-point and list out nearby places of interest for us.
+As a Student, I want to find places within my area to study, eat, or relax between classes so that I can make better use of my free time and not waste it on travelling.
 
-As a tourist, when I am in a country and I am unfamilar with the area I would like to know what places I can go to for my own leisure that is not sourced only from social media as content from platforms like tiktok may be repetitive.
+As a Group of friends, we want to find a meeting location that is convenient for everyone and explore nearby points of interest so that planning outings becomes more easier and fair.
+
+As a Tourist, I want to discover places that are accessible from my current location so that I can explore the area more effectively without relying solely on trending social media recommendations.
 
 --- 
 ## Proposed Features
