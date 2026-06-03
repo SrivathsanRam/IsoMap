@@ -45,11 +45,19 @@ As a Group of friends, we would want to plan a place to meet up but where we mee
 As a tourist, when I am in a country and I am unfamilar with the area I would like to know what places I can go to for my own leisure that is not sourced only from social media as content from platforms like tiktok may be repetitive.
 
 --- 
-## Proposed Core Features
-- Smart Navigation and Basic Routing
+## Proposed Features
+
+### Core Features
+- Basic Routing
 - Travel-Time Proximity 
 - Group Planning
 - Exploration Feature
+
+### Extension Features
+- Smart Navigation 
+- Saved Locations Feature
+- Ratings and Review Feature
+- Live View Feature
 
 ---
 ## Technical Proof-of-Concept
