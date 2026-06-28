@@ -1,83 +1,84 @@
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
-import { User } from "@/types";
-import { api } from "@/services/api";
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
+import type { User } from "@/types"
+import { api } from "@/services/api"
 
 interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (username: string) => Promise<void>;
-  logout: () => Promise<void>;
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (username: string) => Promise<void>
+  logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Initialize user from localStorage (runs once on module load)
 function getInitialUser(): User | null {
   try {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user") 
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser) as User;
-      api.setUserId(parsedUser.id);
-      return parsedUser;
+      const parsedUser = JSON.parse(storedUser) as User
+      api.setUserId(parsedUser.id)
+      return parsedUser
     }
   } catch {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user")
   }
-  return null;
+  return null
 }
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(getInitialUser);
-  const [isLoading, setIsLoading] = useState(false);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(getInitialUser)
+  const [isLoading, setIsLoading] = useState(false)
 
   const login = useCallback(async (username: string) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const response = await api.login(username);
-      setUser(response.user);
-      localStorage.setItem("user", JSON.stringify(response.user));
+      await api.login(username)
+      const tempUser: User = { id: 0, name: username }
+      setUser(tempUser)
+      localStorage.setItem("user", JSON.stringify(tempUser))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, []);
+  }, [])
 
   const logout = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      await api.logout();
-      setUser(null);
-      localStorage.removeItem("user");
+      await api.logout()
+    } catch {
+      // ignore logout errors
     } finally {
-      setIsLoading(false);
+      setUser(null)
+      localStorage.removeItem("user")
+      setIsLoading(false)
     }
-  }, []);
+  }, [])
 
-  const value = useMemo<AuthContextType>(() => ({
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-  }), [user, isLoading, login, logout]);
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isAuthenticated: !!user, 
+      isLoading,
+      login,
+      logout,
+    }),
+    [user, isLoading, login, logout]
+  )
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 // Export hook separately for Fast Refresh compatibility
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider")
   }
-  return context;
-};
+  return context
+}
