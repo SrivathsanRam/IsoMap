@@ -7,11 +7,22 @@ import (
 	"os"
 	"strings"
 
-	"github.com/CVWO/sample-go-app/internal/router"
+	"github.com/SrivathsanRam/IsoMap/internal/database"
+	"github.com/SrivathsanRam/IsoMap/internal/router"
 )
 
 func main() {
 	loadEnv()
+
+	db, err := database.GetDB()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := db.Migrate(); err != nil {
+		log.Fatalln(err)
+	}
+	
 	r := router.Setup()
 	port := os.Getenv("PORT")
 	if port == "" {
