@@ -15,6 +15,10 @@ type Database struct {
 
 func GetDB() (*Database, error) {
 	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		return nil, errors.New("DATABASE_URL is not set")
+	}
+	
 	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to database")
