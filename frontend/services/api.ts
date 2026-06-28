@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, AxiosError, type AxiosResponse } from "axios";
-import type {
+import {
     User,
     Topic,
     Post,
@@ -61,24 +61,49 @@ class ApiService {
   }
 
   // Auth
-  async login(username: string): Promise<LoginResponse> {
-    const response = await this.client.post<ApiResponse<LoginResponse>>("/auth/login", {
-      username,
-    });
-    const data = unwrap(response);
-    this.setUserId(data.user.id);
-    return data;
+  async login(username: string): Promise<void> {
+    await this.client.post("/login", { username })
   }
+
+  async register(username: string): Promise<void> {
+    await this.client.post("/signup", { username })
+  } 
 
   async logout(): Promise<void> {
-    await this.client.post("/auth/logout");
-    this.setUserId(null);
+    this.setUserId(null)
   }
 
-  async getCurrentUser(): Promise<User> {
-    const response = await this.client.get<ApiResponse<User>>("/users/me");
-    return unwrap(response);
+  /* Google related APIs - use once backend updates 
+  async loginWithCredentials(email: string, password: string): Promise<LoginResponse> {
+    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/login', {
+      email,
+      password,
+    })
+    const data = unwrap(response)
+    this.setUserId(data.user.id)
+    return data
   }
+
+  async register(name: string, email: string, password: string): Promise<LoginResponse> {
+    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/register', {
+      name,
+      email,
+      password,
+    })
+    const data = unwrap(response)
+    this.setUserId(data.user.id)
+    return data
+  }
+    
+  async loginWithGoogle(idToken: string): Promise<LoginResponse> {
+    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/google', {
+      idToken,
+    })
+    const data = unwrap(response)
+    this.setUserId(data.user.id)
+    return data
+  }
+  */
 
   // Topics
   async getTopics(): Promise<Topic[]> {
