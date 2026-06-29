@@ -10,6 +10,7 @@ import (
 
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
 	authHandlers "github.com/SrivathsanRam/IsoMap/internal/handlers/auth"
+	"github.com/SrivathsanRam/IsoMap/internal/handlers/routing"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
 )
@@ -40,6 +41,7 @@ func GetRoutes() func(r chi.Router) {
 		r.Get("/auth/me", authHandlers.HandleMe)
 		r.Post("/auth/logout", authHandlers.HandleLogout)
 		r.Post("/isochrone", isochrone)
+		r.Post("/routing/directions", routing.HandleDirections)
 		r.Get("/users", func(w http.ResponseWriter, req *http.Request) {
 			response, _ := users.HandleList(w, req)
 
