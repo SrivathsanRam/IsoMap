@@ -17,34 +17,34 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <Link to="/" className="text-xl font-bold text-gray-900">
-            Forum
+            ISOMAP
           </Link>
           <nav className="flex space-x-4">
             <Link
-              to="/topics"
+              to="/"
               className={`text-sm font-medium ${
-                isActive("/topics")
+                isActive("/")
                   ? "text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Topics
+              Home
             </Link>
             <Link
-              to="/posts"
+              to="/map"
               className={`text-sm font-medium ${
-                isActive("/posts")
+                isActive("/map")
                   ? "text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              All Posts
+              Map
             </Link>
           </nav>
         </div>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-600">
-            Signed in as <span className="font-medium">{user?.username}</span>
+            Signed in as <span className="font-medium">{user?.name}</span>
           </span>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             Sign Out

@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
     try {
       await api.login(username)
-      const tempUser: User = { id: 0, name: username }
+      const tempUser: User = { id: "0", name: username }
       setUser(tempUser)
       localStorage.setItem("user", JSON.stringify(tempUser))
     } finally {

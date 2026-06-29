@@ -1,26 +1,17 @@
 import axios, { type AxiosInstance, AxiosError, type AxiosResponse } from "axios";
-import {
-    User,
-    Topic,
-    Post,
-    Comment,
-    LoginResponse,
-    CreateTopicRequest,
-    UpdateTopicRequest,
-    CreatePostRequest,
-    UpdatePostRequest,
-    CreateCommentRequest,
-    UpdateCommentRequest,
+import type {
+  AddressRequest,
+  Address,
+  AddressSearch,
+  ApiResponse,
+  AuthRequest,
+  MessageResponse,
+  Point,
+  SavedAddress,
+  User,
 } from "../types";
 
-// Use environment variable for API URL (set in .env.development and .env.production)
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-type ApiResponse<T> = {
-  payload?: { data?: T };
-  messages?: string[];
-  errorCode?: number;
-};
 
 function unwrap<T>(response: AxiosResponse<ApiResponse<T>>): T {
   const data = response.data?.payload?.data;
@@ -33,7 +24,7 @@ function unwrap<T>(response: AxiosResponse<ApiResponse<T>>): T {
 
 class ApiService {
   private client: AxiosInstance;
-  private userId: number | null = null;
+  private userId: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -52,130 +43,68 @@ class ApiService {
     });
   }
 
-  setUserId(id: number | null) {
+  setUserId(id: string | null) {
     this.userId = id;
   }
 
-  getUserId(): number | null {
+  getUserId(): string | null {
     return this.userId;
   }
 
   // Auth
   async login(username: string): Promise<void> {
-    await this.client.post("/login", { username })
+    const body: AuthRequest = { username };
+    await this.client.post<MessageResponse>("/login", body);
   }
 
   async register(username: string): Promise<void> {
-    await this.client.post("/signup", { username })
-  } 
+    const body: AuthRequest = { username };
+    await this.client.post<MessageResponse>("/signup", body);
+  }
 
   async logout(): Promise<void> {
-    this.setUserId(null)
+    this.setUserId(null);
   }
 
-  /* Google related APIs - use once backend updates 
-  async loginWithCredentials(email: string, password: string): Promise<LoginResponse> {
-    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/login', {
-      email,
-      password,
-    })
-    const data = unwrap(response)
-    this.setUserId(data.user.id)
-    return data
-  }
-
-  async register(name: string, email: string, password: string): Promise<LoginResponse> {
-    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/register', {
-      name,
-      email,
-      password,
-    })
-    const data = unwrap(response)
-    this.setUserId(data.user.id)
-    return data
-  }
-    
-  async loginWithGoogle(idToken: string): Promise<LoginResponse> {
-    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/google', {
-      idToken,
-    })
-    const data = unwrap(response)
-    this.setUserId(data.user.id)
-    return data
-  }
-  */
-
-  // Topics
-  async getTopics(): Promise<Topic[]> {
-    const response = await this.client.get<ApiResponse<Topic[]>>("/topics");
+  async getUsers(): Promise<User[]> {
+    const response = await this.client.get<ApiResponse<User[]>>("/users");
     return unwrap(response);
   }
 
-  async getTopic(id: number): Promise<Topic> {
-    const response = await this.client.get<ApiResponse<Topic>>(`/topics/${id}`);
+  async getIsochrone(point: Point): Promise<Point[]> {
+    const response = await this.client.post<Point[]>("/isochrone", point);
+    return response.data;
+  }
+
+  async createRecentAddress(userId: string, data: AddressRequest): Promise<Address> {
+    const response = await this.client.post<ApiResponse<Address>>(
+      `/users/${userId}/recent-addresses`,
+      data
+    );
     return unwrap(response);
   }
 
-  async createTopic(data: CreateTopicRequest): Promise<Topic> {
-    const response = await this.client.post<ApiResponse<Topic>>("/topics", data);
+  async getRecentAddresses(userId: string, limit?: number): Promise<AddressSearch[]> {
+    const response = await this.client.get<ApiResponse<AddressSearch[]>>(
+      `/users/${userId}/recent-addresses`,
+      { params: limit ? { limit } : undefined }
+    );
     return unwrap(response);
   }
 
-  async updateTopic(id: number, data: UpdateTopicRequest): Promise<Topic> {
-    const response = await this.client.put<ApiResponse<Topic>>(`/topics/${id}`, data);
+  async createSavedAddress(userId: string, data: AddressRequest): Promise<Address> {
+    const response = await this.client.post<ApiResponse<Address>>(
+      `/users/${userId}/saved-addresses`,
+      data
+    );
     return unwrap(response);
   }
 
-  async deleteTopic(id: number): Promise<void> {
-    await this.client.delete(`/topics/${id}`);
-  }
-
-  // Posts
-  async getPosts(topicId?: number): Promise<Post[]> {
-    const params = topicId ? { topic_id: topicId } : {};
-    const response = await this.client.get<ApiResponse<Post[]>>("/posts", { params });
+  async getSavedAddresses(userId: string): Promise<SavedAddress[]> {
+    const response = await this.client.get<ApiResponse<SavedAddress[]>>(
+      `/users/${userId}/saved-addresses`
+    );
     return unwrap(response);
-  }
-
-  async getPost(id: number): Promise<Post> {
-    const response = await this.client.get<ApiResponse<Post>>(`/posts/${id}`);
-    return unwrap(response);
-  }
-
-  async createPost(data: CreatePostRequest): Promise<Post> {
-    const response = await this.client.post<ApiResponse<Post>>("/posts", data);
-    return unwrap(response);
-  }
-
-  async updatePost(id: number, data: UpdatePostRequest): Promise<Post> {
-    const response = await this.client.put<ApiResponse<Post>>(`/posts/${id}`, data);
-    return unwrap(response);
-  }
-
-  async deletePost(id: number): Promise<void> {
-    await this.client.delete(`/posts/${id}`);
-  }
-
-  // Comments
-  async getComments(postId: number): Promise<Comment[]> {
-    const response = await this.client.get<ApiResponse<Comment[]>>("/comments", {
-      params: { post_id: postId },
-    });
-    return unwrap(response);
-  }
-
-  async createComment(data: CreateCommentRequest): Promise<Comment> {
-    const response = await this.client.post<ApiResponse<Comment>>("/comments", data);
-    return unwrap(response);
-  }
-
-  async updateComment(id: number, data: UpdateCommentRequest): Promise<Comment> {
-    const response = await this.client.put<ApiResponse<Comment>>(`/comments/${id}`, data);
-    return unwrap(response);
-  }
-
-  async deleteComment(id: number): Promise<void> {
-    await this.client.delete(`/comments/${id}`);
   }
 }
 
