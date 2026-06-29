@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import { createOuting } from "../src/lib/api"
 import {
   ChevronRight,
   Clock,
@@ -21,6 +22,13 @@ export default function LandingPage() {
   const handleLogout = async () => {
     await logout()
     navigate("/login")
+  }
+
+  const handleCreateOuting = async () => {
+    const outing = await createOuting("Group outing")
+    const path = `/outings/${outing.join_token}`
+    await navigator.clipboard.writeText(`${window.location.origin}${path}`)
+    navigate(path)
   }
 
   return (
@@ -50,7 +58,10 @@ export default function LandingPage() {
             <button className="rounded-md px-4 py-2 hover:bg-white hover:text-slate-950">
               Proximity
             </button>
-            <button className="rounded-md px-4 py-2 hover:bg-white hover:text-slate-950">
+            <button
+              onClick={handleCreateOuting}
+              className="rounded-md px-4 py-2 hover:bg-white hover:text-slate-950"
+            >
               Group
             </button>
           </nav>
@@ -138,7 +149,7 @@ export default function LandingPage() {
               color="violet"
               title="Group meetup"
               description="Drop in everyone's location and find the fairest meeting point for the whole group instantly."
-              onClick={() => navigate("/map")}
+              onClick={handleCreateOuting}
             />
           </div>
         </section>

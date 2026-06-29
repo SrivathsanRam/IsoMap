@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { AuthProvider, useAuth } from "../context/AuthContext"
 import { LoginPage } from "../components/Auth/LoginPage"
 import LandingPage from "../pages/LandingPage"
+import OutingPage from "../pages/OutingPage"
 import { Map } from "./components/Map"
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/outings/:token" element={<OutingPage />} />
 
       <Route path="/" element={
         <ProtectedRoute><LandingPage /></ProtectedRoute>

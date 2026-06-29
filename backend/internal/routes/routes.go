@@ -10,6 +10,7 @@ import (
 
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
 	authHandlers "github.com/SrivathsanRam/IsoMap/internal/handlers/auth"
+	"github.com/SrivathsanRam/IsoMap/internal/handlers/outings"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/routing"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
@@ -18,8 +19,9 @@ import (
 var mapboxClient = http.Client{Timeout: 10 * time.Second}
 
 type isochroneRequest struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	Lat     float64 `json:"lat"`
+	Lon     float64 `json:"lon"`
+	Minutes int     `json:"minutes"`
 }
 
 type point struct {
@@ -42,6 +44,10 @@ func GetRoutes() func(r chi.Router) {
 		r.Post("/auth/logout", authHandlers.HandleLogout)
 		r.Post("/isochrone", isochrone)
 		r.Post("/routing/directions", routing.HandleDirections)
+		r.Post("/outings", outings.HandleCreate)
+		r.Get("/outings/{token}", outings.HandleGet)
+		r.Post("/outings/{token}/members", outings.HandleJoin)
+		r.Put("/outings/{token}/members/{memberID}", outings.HandleUpdateMember)
 		r.Get("/users", func(w http.ResponseWriter, req *http.Request) {
 			response, _ := users.HandleList(w, req)
 
@@ -79,7 +85,15 @@ func fetchIsochrone(body isochroneRequest) ([]point, error) {
 	}
 
 	query := url.Values{}
-	query.Set("contours_minutes", "15")
+	minutes := body.Minutes
+	if minutes < 5 {
+		minutes = 15
+	}
+	if minutes > 90 {
+		minutes = 90
+	}
+
+	query.Set("contours_minutes", fmt.Sprintf("%d", minutes))
 	query.Set("polygons", "true")
 	query.Set("access_token", token)
 
