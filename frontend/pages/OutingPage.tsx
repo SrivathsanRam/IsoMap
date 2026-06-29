@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
-import { featureCollection, intersect, polygon } from "@turf/turf"
+import { featureCollection, polygon } from "@turf/helpers"
+import intersect from "@turf/intersect"
 
 import {
   getIsochrone,
