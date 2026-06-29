@@ -119,6 +119,11 @@ func HandleJoin(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUpdateMember(w http.ResponseWriter, r *http.Request) {
+	outing, ok := getOuting(w, r)
+	if !ok {
+		return
+	}
+
 	memberID, err := uuid.Parse(chi.URLParam(r, "memberID"))
 	if err != nil {
 		write(w, http.StatusBadRequest, "Invalid member ID")
@@ -148,7 +153,7 @@ func HandleUpdateMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var member models.OutingMember
-	if err := db.DB.First(&member, "id = ?", memberID).Error; err != nil {
+	if err := db.DB.First(&member, "id = ? AND outing_id = ?", memberID, outing.ID).Error; err != nil {
 		write(w, http.StatusNotFound, "Member not found")
 		return
 	}

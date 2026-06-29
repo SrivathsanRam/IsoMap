@@ -27,7 +27,11 @@ export default function LandingPage() {
   const handleCreateOuting = async () => {
     const outing = await createOuting("Group outing")
     const path = `/outings/${outing.join_token}`
-    await navigator.clipboard.writeText(`${window.location.origin}${path}`)
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${path}`)
+    } catch {
+      // The outing page still opens if clipboard permission is unavailable.
+    }
     navigate(path)
   }
 
