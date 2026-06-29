@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/SrivathsanRam/IsoMap/internal/api"
+	sessionauth "github.com/SrivathsanRam/IsoMap/internal/auth"
 	addressStore "github.com/SrivathsanRam/IsoMap/internal/dataaccess/addresses"
 	"github.com/SrivathsanRam/IsoMap/internal/database"
 	"github.com/SrivathsanRam/IsoMap/internal/models"
@@ -136,6 +137,16 @@ func requestContext(w http.ResponseWriter, r *http.Request) (*database.Database,
 	userID, err := uuid.Parse(chi.URLParam(r, "userID"))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "Invalid user ID")
+		return nil, uuid.Nil, false
+	}
+
+	sessionUserID, err := sessionauth.CurrentUserID(r)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "Not signed in")
+		return nil, uuid.Nil, false
+	}
+	if sessionUserID != userID {
+		writeError(w, http.StatusForbidden, "Cannot access another user's addresses")
 		return nil, uuid.Nil, false
 	}
 
