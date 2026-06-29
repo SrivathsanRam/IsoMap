@@ -20,6 +20,8 @@ type SearchBarProps = {
   isochroneAreaKm2: number | null;
   routeResults: RouteSummary[];
   activeRouteIndex: number;
+  isLoading: boolean;
+  error: string;
   onModeChange: (mode: MapToolMode) => void;
   onIsochroneSelect: (place: Place) => void;
   onRoutePlaceChange: (field: keyof RouteSelection, place: Place) => void;
@@ -45,6 +47,8 @@ export function SearchBar({
   isochroneAreaKm2,
   routeResults,
   activeRouteIndex,
+  isLoading,
+  error,
   onModeChange,
   onIsochroneSelect,
   onRoutePlaceChange,
@@ -77,6 +81,7 @@ export function SearchBar({
       {mode === "isochrone" ? (
         <>
           <PlaceInput placeholder="Search Singapore" onSelect={onIsochroneSelect} />
+          {isLoading && <p className="map-panel-message">Loading isochrone...</p>}
           {isochroneAreaKm2 !== null && (
             <div className="map-panel-section">
               <h3>Isochrone statistics</h3>
@@ -94,12 +99,10 @@ export function SearchBar({
           <div className="route-inputs">
             <PlaceInput
               placeholder="Start location"
-              selectedPlace={routeSelection.start}
               onSelect={(place) => onRoutePlaceChange("start", place)}
             />
             <PlaceInput
               placeholder="End location"
-              selectedPlace={routeSelection.end}
               onSelect={(place) => onRoutePlaceChange("end", place)}
             />
             <button
@@ -108,9 +111,11 @@ export function SearchBar({
               disabled={!routeSelection.start || !routeSelection.end}
               onClick={onRouteSubmit}
             >
-              Get routes
+              {isLoading ? "Loading routes..." : "Get routes"}
             </button>
           </div>
+
+          {error && <p className="map-panel-error">{error}</p>}
 
           {routeResults.length > 0 && (
             <div className="map-panel-section route-results">
@@ -144,23 +149,16 @@ export function SearchBar({
 
 function PlaceInput({
   placeholder,
-  selectedPlace,
   onSelect,
 }: {
   placeholder: string;
-  selectedPlace?: Place;
   onSelect: (place: Place) => void;
 }) {
-  const [query, setQuery] = useState(selectedPlace?.display_name ?? "");
+  const [query, setQuery] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
 
   useEffect(() => {
-    setQuery(selectedPlace?.display_name ?? "");
-  }, [selectedPlace]);
-
-  useEffect(() => {
-    if (query.trim().length < 2 || query === selectedPlace?.display_name) {
-      setPlaces([]);
+    if (query.trim().length < 2) {
       return;
     }
 
@@ -191,7 +189,14 @@ function PlaceInput({
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [query, selectedPlace]);
+  }, [query]);
+
+  function changeQuery(value: string) {
+    setQuery(value);
+    if (value.trim().length < 2) {
+      setPlaces([]);
+    }
+  }
 
   function select(place: Place) {
     setQuery(place.display_name);
@@ -203,7 +208,7 @@ function PlaceInput({
     <div className="place-input">
       <input
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => changeQuery(event.target.value)}
         placeholder={placeholder}
       />
       {places.length > 0 && (

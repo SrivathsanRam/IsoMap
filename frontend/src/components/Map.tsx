@@ -46,6 +46,8 @@ export function Map() {
   const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [activeRouteIndex, setActiveRouteIndex] = useState(0);
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) {
@@ -69,6 +71,7 @@ export function Map() {
     clearMapLayers();
     setRoutes([]);
     setIsochroneAreaKm2(null);
+    setError("");
   }
 
   async function selectIsochronePlace(place: Place) {
@@ -80,32 +83,41 @@ export function Map() {
     }
 
     clearMapLayers();
+    setIsLoading(true);
+    setError("");
     map.setView([lat, lon], 15);
     markerRef.current = L.marker([lat, lon]).addTo(map);
 
-    const response = await fetch(`${api}/isochrone`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lat, lon }),
-    });
-    if (!response.ok) {
-      return;
-    }
-    const points = (await response.json()) as Point[];
-    const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
+    try {
+      const response = await fetch(`${api}/isochrone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat, lon }),
+      });
+      if (!response.ok) {
+        throw new Error("Could not load isochrone.");
+      }
+      const points = (await response.json()) as Point[];
+      const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
 
-    polygonRef.current = L.polygon(polygon, {
-      color: "#2563eb",
-      fillColor: "#60a5fa",
-      fillOpacity: 0.25,
-    }).addTo(map);
-    setIsochroneAreaKm2(calculatePolygonAreaKm2(points));
-    map.fitBounds(polygonRef.current.getBounds());
+      polygonRef.current = L.polygon(polygon, {
+        color: "#2563eb",
+        fillColor: "#60a5fa",
+        fillOpacity: 0.25,
+      }).addTo(map);
+      setIsochroneAreaKm2(calculatePolygonAreaKm2(points));
+      map.fitBounds(polygonRef.current.getBounds());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load isochrone.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function changeRoutePlace(field: "start" | "end", place: Place) {
     setRouteSelection((current) => ({ ...current, [field]: place }));
     setRoutes([]);
+    setError("");
     clearMapLayers();
   }
 
@@ -114,23 +126,32 @@ export function Map() {
       return;
     }
 
-    const response = await fetch(`${api}/routing/directions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        start: placeToPoint(routeSelection.start),
-        end: placeToPoint(routeSelection.end),
-        mode: "transit",
-      }),
-    });
-    if (!response.ok) {
-      return;
-    }
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${api}/routing/directions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          start: placeToPoint(routeSelection.start),
+          end: placeToPoint(routeSelection.end),
+          mode: "transit",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Could not load routes from OneMap.");
+      }
 
-    const data = (await response.json()) as DirectionsResponse;
-    setRoutes(data.routes);
-    setActiveRouteIndex(0);
-    drawRoute(data.routes[0], routeSelection.start, routeSelection.end);
+      const data = (await response.json()) as DirectionsResponse;
+      setRoutes(data.routes);
+      setActiveRouteIndex(0);
+      drawRoute(data.routes[0], routeSelection.start, routeSelection.end);
+    } catch (err) {
+      setRoutes([]);
+      setError(err instanceof Error ? err.message : "Could not load routes from OneMap.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function selectRoute(index: number) {
@@ -182,6 +203,8 @@ export function Map() {
         isochroneAreaKm2={isochroneAreaKm2}
         routeResults={routes}
         activeRouteIndex={activeRouteIndex}
+        isLoading={isLoading}
+        error={error}
         onModeChange={changeMode}
         onIsochroneSelect={selectIsochronePlace}
         onRoutePlaceChange={changeRoutePlace}

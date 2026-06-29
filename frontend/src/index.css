@@ -151,6 +151,24 @@ button {
   padding-top: 12px;
 }
 
+.map-panel-message,
+.map-panel-error {
+  border-radius: 8px;
+  font-size: 13px;
+  margin: 10px 0 0;
+  padding: 9px 10px;
+}
+
+.map-panel-message {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.map-panel-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
 .map-panel-section h3 {
   color: #0f172a;
   font-size: 14px;
