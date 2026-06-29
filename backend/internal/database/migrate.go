@@ -16,8 +16,10 @@ func (database *Database) Migrate() error {
 		&models.Address{},
 		&models.AddressSearch{},
 		&models.SavedAddress{},
+		&models.Outing{},
+		&models.OutingMember{},
 	)
-	
+
 	if err != nil {
 		return errors.Wrap(err, "failed to run database migrations")
 	}
