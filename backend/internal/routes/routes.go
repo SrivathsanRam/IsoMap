@@ -9,15 +9,12 @@ import (
 	"time"
 
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
+	authHandlers "github.com/SrivathsanRam/IsoMap/internal/handlers/auth"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
 )
 
 var mapboxClient = http.Client{Timeout: 10 * time.Second}
-
-type authRequest struct {
-	Username string `json:"username"`
-}
 
 type isochroneRequest struct {
 	Lat float64 `json:"lat"`
@@ -39,8 +36,9 @@ type mapboxIsochrone struct {
 
 func GetRoutes() func(r chi.Router) {
 	return func(r chi.Router) {
-		r.Post("/login", login)
-		r.Post("/signup", signup)
+		r.Post("/auth/google", authHandlers.HandleGoogleLogin)
+		r.Get("/auth/me", authHandlers.HandleMe)
+		r.Post("/auth/logout", authHandlers.HandleLogout)
 		r.Post("/isochrone", isochrone)
 		r.Get("/users", func(w http.ResponseWriter, req *http.Request) {
 			response, _ := users.HandleList(w, req)
@@ -53,23 +51,6 @@ func GetRoutes() func(r chi.Router) {
 		r.Post("/users/{userID}/saved-addresses", addresses.HandleCreateSaved)
 		r.Get("/users/{userID}/saved-addresses", addresses.HandleListSaved)
 	}
-}
-
-func login(w http.ResponseWriter, req *http.Request) {
-	var body authRequest
-	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
-		write(w, http.StatusBadRequest, "Invalid request")
-		return
-	}
-	if body.Username != "Tester" {
-		write(w, http.StatusUnauthorized, "Invalid username")
-		return
-	}
-	write(w, http.StatusOK, "Login successful")
-}
-
-func signup(w http.ResponseWriter, req *http.Request) {
-	write(w, http.StatusOK, "Signup successful")
 }
 
 func isochrone(w http.ResponseWriter, req *http.Request) {

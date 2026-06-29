@@ -15,14 +15,6 @@ export interface ApiResponse<T> {
   errorCode?: number;
 }
 
-export interface MessageResponse {
-  message: string;
-}
-
-export interface AuthRequest {
-  username: string;
-}
-
 export interface Point {
   lat: number;
   lon: number;

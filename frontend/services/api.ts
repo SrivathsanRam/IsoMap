@@ -4,8 +4,6 @@ import type {
   Address,
   AddressSearch,
   ApiResponse,
-  AuthRequest,
-  MessageResponse,
   Point,
   SavedAddress,
   User,
@@ -29,6 +27,7 @@ class ApiService {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
@@ -52,18 +51,23 @@ class ApiService {
   }
 
   // Auth
-  async login(username: string): Promise<void> {
-    const body: AuthRequest = { username };
-    await this.client.post<MessageResponse>("/login", body);
-  }
-
-  async register(username: string): Promise<void> {
-    const body: AuthRequest = { username };
-    await this.client.post<MessageResponse>("/signup", body);
+  async loginWithGoogle(credential: string): Promise<User> {
+    const response = await this.client.post<ApiResponse<User>>("/auth/google", { credential });
+    const user = unwrap(response);
+    this.setUserId(user.id);
+    return user;
   }
 
   async logout(): Promise<void> {
+    await this.client.post("/auth/logout");
     this.setUserId(null);
+  }
+
+  async getCurrentUser(): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>("/auth/me");
+    const user = unwrap(response);
+    this.setUserId(user.id);
+    return user;
   }
 
   async getUsers(): Promise<User[]> {
