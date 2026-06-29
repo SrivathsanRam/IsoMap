@@ -111,6 +111,7 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 		query.Set("date", now.Format("01-02-2006"))
 		query.Set("time", now.Format("15:04:05"))
 		query.Set("mode", "TRANSIT")
+		query.Set("maxWalkDistance", "1000")
 		query.Set("numItineraries", "3")
 	}
 
@@ -120,7 +121,7 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 		return nil, err
 	}
 	if token := os.Getenv("ONEMAP_API_KEY"); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", token)
 	}
 
 	resp, err := oneMapClient.Do(req)
