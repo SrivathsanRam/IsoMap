@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/CVWO/sample-go-app/internal/handlers/users"
+	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
 )
 

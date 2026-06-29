@@ -1,12 +1,20 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+	"github.com/google/uuid"
+)
 
 type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID           uuid.UUID `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name         string    `json:"name" gorm:"not null"`
+	Email        string    `json:"email" gorm:"uniqueIndex;not null"`
+	PasswordHash string    `json:"-" gorm:"column:password_hash;not null"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 func (user *User) Greet() string {
-	return fmt.Sprintf("Hello, I am %s", user.Name)
+	return fmt.Sprintf("Hello, Welcome %s", user.Name)
 }

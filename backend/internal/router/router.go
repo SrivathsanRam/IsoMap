@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/CVWO/sample-go-app/internal/routes"
+	"github.com/SrivathsanRam/IsoMap/internal/routes"
 	"github.com/go-chi/chi/v5"
 )
 
