@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/SrivathsanRam/IsoMap/internal/api"
-	users "github.com/SrivathsanRam/IsoMap/internal/dataaccess"
+	users "github.com/SrivathsanRam/IsoMap/internal/dataaccess/users"
 	"github.com/SrivathsanRam/IsoMap/internal/database"
 	"github.com/pkg/errors"
 )
