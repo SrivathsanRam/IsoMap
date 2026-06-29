@@ -12,6 +12,7 @@ export type AddressPayload = {
 export async function createRecentAddress(userId: string, address: AddressPayload) {
   const response = await fetch(`${API_URL}/users/${userId}/recent-addresses`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(address),
   });
@@ -24,7 +25,9 @@ export async function createRecentAddress(userId: string, address: AddressPayloa
 }
 
 export async function listRecentAddresses(userId: string) {
-  const response = await fetch(`${API_URL}/users/${userId}/recent-addresses`);
+  const response = await fetch(`${API_URL}/users/${userId}/recent-addresses`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to load recent addresses");
@@ -36,6 +39,7 @@ export async function listRecentAddresses(userId: string) {
 export async function createSavedAddress(userId: string, address: AddressPayload) {
   const response = await fetch(`${API_URL}/users/${userId}/saved-addresses`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(address),
   });
@@ -48,7 +52,9 @@ export async function createSavedAddress(userId: string, address: AddressPayload
 }
 
 export async function listSavedAddresses(userId: string) {
-  const response = await fetch(`${API_URL}/users/${userId}/saved-addresses`);
+  const response = await fetch(`${API_URL}/users/${userId}/saved-addresses`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to load saved addresses");

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -34,7 +33,7 @@ func HandleGoogleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := idtoken.Validate(context.Background(), body.Credential, clientID)
+	payload, err := idtoken.Validate(r.Context(), body.Credential, clientID)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "Invalid Google credential")
 		return

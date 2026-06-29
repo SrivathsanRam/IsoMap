@@ -52,7 +52,7 @@ func FindOrCreateGoogle(db *database.Database, profile GoogleProfile) (*models.U
 
 	err = db.DB.Where("email = ?", profile.Email).First(&user).Error
 	if err == nil {
-		user.GoogleSubject = profile.Subject
+		user.GoogleSubject = &profile.Subject
 		user.Name = profile.Name
 		user.PictureURL = profile.PictureURL
 		if err := db.DB.Save(&user).Error; err != nil {
@@ -67,7 +67,7 @@ func FindOrCreateGoogle(db *database.Database, profile GoogleProfile) (*models.U
 	user = models.User{
 		Name:          profile.Name,
 		Email:         profile.Email,
-		GoogleSubject: profile.Subject,
+		GoogleSubject: &profile.Subject,
 		PictureURL:    profile.PictureURL,
 		PasswordHash:  "",
 	}
