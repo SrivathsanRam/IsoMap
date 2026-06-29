@@ -125,11 +125,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:grid-cols-1">
-            <Stat value="5+" label="Transport modes" />
-            <Stat value="20 min" label="Avg commute saved" />
-            <Stat value="Real-time" label="Crowd & traffic data" />
-          </div>
         </section>
 
         <section className="pb-16">
@@ -200,11 +195,3 @@ function FeatureCard({
   )
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-lg bg-white px-3 py-4 text-center shadow-sm">
-      <div className="text-xl font-semibold text-slate-950">{value}</div>
-      <div className="mt-1 text-xs text-slate-500">{label}</div>
-    </div>
-  )
-}

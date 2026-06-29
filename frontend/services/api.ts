@@ -22,7 +22,6 @@ function unwrap<T>(response: AxiosResponse<ApiResponse<T>>): T {
 
 class ApiService {
   private client: AxiosInstance;
-  private userId: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -32,42 +31,21 @@ class ApiService {
         "Content-Type": "application/json",
       },
     });
-
-    // Add interceptor to include X-User-ID header
-    this.client.interceptors.request.use((config) => {
-      if (this.userId) {
-        config.headers["X-User-ID"] = this.userId.toString();
-      }
-      return config;
-    });
-  }
-
-  setUserId(id: string | null) {
-    this.userId = id;
-  }
-
-  getUserId(): string | null {
-    return this.userId;
   }
 
   // Auth
   async loginWithGoogle(credential: string): Promise<User> {
     const response = await this.client.post<ApiResponse<User>>("/auth/google", { credential });
-    const user = unwrap(response);
-    this.setUserId(user.id);
-    return user;
+    return unwrap(response);
   }
 
   async logout(): Promise<void> {
     await this.client.post("/auth/logout");
-    this.setUserId(null);
   }
 
   async getCurrentUser(): Promise<User> {
     const response = await this.client.get<ApiResponse<User>>("/auth/me");
-    const user = unwrap(response);
-    this.setUserId(user.id);
-    return user;
+    return unwrap(response);
   }
 
   async getUsers(): Promise<User[]> {
