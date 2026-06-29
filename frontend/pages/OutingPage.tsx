@@ -168,7 +168,7 @@ export default function OutingPage() {
       L.polygon(latLngs, {
         color: memberColor(index),
         fillColor: memberColor(index),
-        fillOpacity: 0.12,
+        fillOpacity: 0.08,
         weight: 2,
       }).addTo(layerGroup)
       latLngs.forEach((point) => bounds.extend(point))
@@ -176,15 +176,15 @@ export default function OutingPage() {
 
     const overlap = intersectAll(polygons)
     if (overlap) {
-      const rings = overlap.geometry.coordinates
-      rings.forEach((ring) => {
-        const latLngs = ring.map(([lon, lat]) => [lat, lon] as L.LatLngExpression)
-        L.polygon(latLngs, {
-          color: "#111827",
+      overlapToLatLngRings(overlap).forEach((latLngs) => {
+        const overlapLayer = L.polygon(latLngs, {
+          color: "#166534",
           fillColor: "#22c55e",
-          fillOpacity: 0.35,
-          weight: 3,
+          fillOpacity: 0.5,
+          opacity: 1,
+          weight: 4,
         }).addTo(layerGroup)
+        overlapLayer.bringToFront()
         latLngs.forEach((point) => bounds.extend(point))
       })
     }
@@ -364,18 +364,10 @@ function PlaceSearch({ onSelect }: { onSelect: (place: Place) => void }) {
 }
 
 function intersectAll(polygons: MemberPolygon[]) {
-  const features = polygons
-    .map((entry) => {
-      const ring = entry.points.map((point) => [point.lon, point.lat])
-      if (ring.length > 0) {
-        const first = ring[0]
-        const last = ring[ring.length - 1]
-        if (first[0] !== last[0] || first[1] !== last[1]) {
-          ring.push(first)
-        }
-      }
-      return polygon([ring])
-    })
+  const features = polygons.flatMap((entry) => {
+    const ring = toTurfRing(entry.points)
+    return ring ? [polygon([ring])] : []
+  })
 
   if (features.length < 2) {
     return null
@@ -386,11 +378,43 @@ function intersectAll(polygons: MemberPolygon[]) {
     overlap = intersect(featureCollection([overlap, features[index]]))
   }
 
-  if (!overlap || overlap.geometry.type !== "Polygon") {
+  if (!overlap || !["Polygon", "MultiPolygon"].includes(overlap.geometry.type)) {
     return null
   }
 
   return overlap
+}
+
+function toTurfRing(points: Point[]) {
+  const ring = points
+    .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon))
+    .map((point) => [point.lon, point.lat])
+
+  if (ring.length < 3) {
+    return null
+  }
+
+  const first = ring[0]
+  const last = ring[ring.length - 1]
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    ring.push([...first])
+  }
+
+  return ring.length >= 4 ? ring : null
+}
+
+function overlapToLatLngRings(overlap: NonNullable<ReturnType<typeof intersectAll>>) {
+  if (overlap.geometry.type === "Polygon") {
+    return overlap.geometry.coordinates
+      .slice(0, 1)
+      .map((ring) => ring.map(([lon, lat]) => [lat, lon] as L.LatLngExpression))
+  }
+
+  return overlap.geometry.coordinates.flatMap((polygonRings) =>
+    polygonRings
+      .slice(0, 1)
+      .map((ring) => ring.map(([lon, lat]) => [lat, lon] as L.LatLngExpression)),
+  )
 }
 
 function memberColor(index: number) {
