@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
 )
@@ -47,6 +48,10 @@ func GetRoutes() func(r chi.Router) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
 		})
+		r.Post("/users/{userID}/recent-addresses", addresses.HandleCreateRecent)
+		r.Get("/users/{userID}/recent-addresses", addresses.HandleListRecent)
+		r.Post("/users/{userID}/saved-addresses", addresses.HandleCreateSaved)
+		r.Get("/users/{userID}/saved-addresses", addresses.HandleListSaved)
 	}
 }
 
