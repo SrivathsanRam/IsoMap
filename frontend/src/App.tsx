@@ -4,28 +4,46 @@ import { AuthProvider, useAuth } from "../context/AuthContext"
 import { LoginPage } from "../components/Auth/LoginPage"
 import LandingPage from "../pages/LandingPage"
 
-const MapPage = lazy(() => import("./components/Map").then((module) => ({ default: module.Map })))
+const MapPage = lazy(() => import("./components/Map").then((m) => ({ default: m.Map })))
 const OutingPage = lazy(() => import("../pages/OutingPage"))
 
+// Requires a real Google account — blocks guests
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isGuest, isLoading } = useAuth()
+  if (isLoading) return null
+  if (!isAuthenticated || isGuest) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+// Allows both real users AND guests — blocks only logged-out users
+function AuthOrGuestRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  return <>{children}</>
 }
 
 function AppRoutes() {
   return (
     <Suspense fallback={null}>
       <Routes>
+        {/* Public */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/outings/:token" element={<OutingPage />} />
 
+        {/* Guests + signed-in: landing page and map */}
         <Route path="/" element={
-          <ProtectedRoute><LandingPage /></ProtectedRoute>
+          <AuthOrGuestRoute><LandingPage /></AuthOrGuestRoute>
+        } />
+        <Route path="/map" element={
+          <AuthOrGuestRoute><MapPage /></AuthOrGuestRoute>
         } />
 
-        <Route path="/map" element={
-          <ProtectedRoute><MapPage /></ProtectedRoute>
+        {/* Signed-in only: group planning */}
+        <Route path="/group" element={
+          <ProtectedRoute>
+            <div className="p-8 text-white">Group Planning — coming soon</div>
+          </ProtectedRoute>
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
