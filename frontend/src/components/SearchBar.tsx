@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { CircleDot, Route } from "lucide-react";
+import { CircleDot, Route, History, Bookmark, BookmarkCheck } from "lucide-react";
+import { useRecentAddresses } from "../lib/useRecentAddresses";
+import { useSavedAddresses } from "../lib/useSavedAddresses";
+import { placeToAddressRequest, addressToPlace } from "../lib/placeAdapters";
 
 export type Place = {
   display_name: string;
@@ -55,6 +58,28 @@ export function SearchBar({
   onRouteSubmit,
   onRouteSelect,
 }: SearchBarProps) {
+  const { recents, addRecent } = useRecentAddresses();
+  const { saved, savePlace, isSaved } = useSavedAddresses();
+
+  const [selectedIsoPlace, setSelectedIsoPlace] = useState<Place | null>(null);
+  const [activePanel, setActivePanel] = useState<"recents" | "saved" | null>(null);
+
+  // Central place-selection router: sends the pick to the right handler
+  // depending on mode, and to whichever routing field still needs filling.
+  function selectPlace(place: Place, queryText: string) {
+    addRecent(placeToAddressRequest(place, queryText));
+
+    if (mode === "isochrone") {
+      setSelectedIsoPlace(place);
+      onIsochroneSelect(place);
+    } else {
+      const field: keyof RouteSelection = routeSelection.start ? "end" : "start";
+      onRoutePlaceChange(field, place);
+    }
+
+    setActivePanel(null);
+  }
+
   return (
     <aside className="map-panel">
       <div className="map-mode-toggle" aria-label="Map tool mode">
@@ -78,9 +103,94 @@ export function SearchBar({
         </button>
       </div>
 
+      {/* Recents / Saved shortcuts */}
+      <div className="panel-shortcuts">
+        <button
+          type="button"
+          className={activePanel === "recents" ? "panel-shortcut active" : "panel-shortcut"}
+          onClick={() => setActivePanel((p) => (p === "recents" ? null : "recents"))}
+          title="Recent searches"
+        >
+          <History size={16} />
+          Recent
+        </button>
+        <button
+          type="button"
+          className={activePanel === "saved" ? "panel-shortcut active" : "panel-shortcut"}
+          onClick={() => setActivePanel((p) => (p === "saved" ? null : "saved"))}
+          title="Saved places"
+        >
+          <Bookmark size={16} />
+          Saved
+        </button>
+      </div>
+
+      {activePanel === "recents" && (
+        <ul className="shortcut-panel">
+          {recents.length === 0 && <li className="shortcut-empty">No recent searches yet</li>}
+          {recents.map((r) => (
+            <li key={r.id}>
+              <button
+                type="button"
+                onClick={() => selectPlace(addressToPlace(r.address), r.query_text)}
+              >
+                <History size={13} className="shortcut-icon" />
+                {r.address.formatted_address}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {activePanel === "saved" && (
+        <ul className="shortcut-panel">
+          {saved.length === 0 && <li className="shortcut-empty">No saved places yet</li>}
+          {saved.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onClick={() => selectPlace(addressToPlace(s.address), s.address.formatted_address)}
+              >
+                <Bookmark size={13} className="shortcut-icon" />
+                {s.nickname ? `${s.nickname} — ${s.address.formatted_address}` : s.address.formatted_address}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {mode === "isochrone" ? (
         <>
-          <PlaceInput placeholder="Search Singapore" onSelect={onIsochroneSelect} />
+          <PlaceInput
+            placeholder="Search Singapore"
+            onSelect={(place, queryText) => selectPlace(place, queryText)}
+          />
+
+          {selectedIsoPlace && (
+            <div className="selected-place-row">
+              <p className="selected-place-name">{selectedIsoPlace.display_name}</p>
+              <button
+                type="button"
+                className="save-place-button"
+                onClick={() => savePlace(placeToAddressRequest(selectedIsoPlace))}
+              >
+                {isSaved(
+                  parseFloat(selectedIsoPlace.lat),
+                  parseFloat(selectedIsoPlace.lon),
+                  selectedIsoPlace.display_name
+                ) ? (
+                  <>
+                    <BookmarkCheck size={14} /> Saved
+                  </>
+                ) : (
+                  <>
+                    <Bookmark size={14} /> Save place
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {isLoading && <p className="map-panel-message">Loading isochrone...</p>}
           {isochroneAreaKm2 !== null && (
             <div className="map-panel-section">
@@ -99,11 +209,11 @@ export function SearchBar({
           <div className="route-inputs">
             <PlaceInput
               placeholder="Start location"
-              onSelect={(place) => onRoutePlaceChange("start", place)}
+              onSelect={(place, queryText) => selectPlace(place, queryText)}
             />
             <PlaceInput
               placeholder="End location"
-              onSelect={(place) => onRoutePlaceChange("end", place)}
+              onSelect={(place, queryText) => selectPlace(place, queryText)}
             />
             <button
               type="button"
@@ -152,7 +262,7 @@ function PlaceInput({
   onSelect,
 }: {
   placeholder: string;
-  onSelect: (place: Place) => void;
+  onSelect: (place: Place, queryText: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
@@ -201,7 +311,7 @@ function PlaceInput({
   function select(place: Place) {
     setQuery(place.display_name);
     setPlaces([]);
-    onSelect(place);
+    onSelect(place, query);
   }
 
   return (
@@ -215,7 +325,7 @@ function PlaceInput({
         <ul>
           {places.map((place) => (
             <li key={`${place.lat}-${place.lon}-${place.display_name}`}>
-              <button type="button" onClick={() => select(place)}>
+              <button type="button" onMouseDown={() => select(place)}>
                 {place.display_name}
               </button>
             </li>
