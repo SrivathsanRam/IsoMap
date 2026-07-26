@@ -22,7 +22,7 @@ func main() {
 	if err := db.Migrate(); err != nil {
 		log.Fatalln(err)
 	}
-	
+
 	r := router.Setup()
 	port := os.Getenv("PORT")
 	if port == "" {

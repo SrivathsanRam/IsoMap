@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-950: #0d0520;   /* darkest — main background */
+  --color-brand-900: #1f0b3c;   /* your exact hex */
+  --color-brand-800: #2d1057;   /* slightly lighter */
+  --color-brand-600: #4a1a8a;   /* mid — for hover states */
+  --color-brand-400: #7c3aed;   /* bright — for accents and glows */
+  --color-brand-200: #c4b5fd;   /* light — for subtle text tints */
+}
+
 * {
   box-sizing: border-box;
 }
@@ -14,7 +23,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   color: #17202a;
-  background: #020617;
+  background: #0d0520;
 }
 
 button,
