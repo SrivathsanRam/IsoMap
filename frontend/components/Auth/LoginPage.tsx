@@ -79,7 +79,7 @@ export function LoginPage() {
               onSuccess={(res) => handleGoogleCredential(res.credential)}
               onError={() => setError("Google sign-in failed.")}
               width="100%"
-              theme="filled_white"
+              theme="filled_blue"
               shape="rectangular"
               size="large"
             />
