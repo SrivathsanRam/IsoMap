@@ -90,6 +90,12 @@ button {
   margin: 0;
 }
 
+.preset-sidebar-actions {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
 .preset-sidebar-header button,
 .preset-primary {
   align-items: center;
@@ -101,6 +107,42 @@ button {
   font-weight: 700;
   gap: 6px;
   padding: 9px 10px;
+}
+
+.preset-sidebar-header .preset-collapse-button {
+  background: #f8fafc;
+  border: 1px solid #dbe3e8;
+  color: #0f172a;
+  padding: 9px;
+}
+
+.preset-expand-tab {
+  align-items: center;
+  background: white;
+  border: 1px solid #d7dde2;
+  border-radius: 10px 0 0 10px;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 18%);
+  color: #0f172a;
+  display: flex;
+  gap: 7px;
+  padding: 10px 9px;
+  position: absolute;
+  right: 0;
+  top: 48px;
+  z-index: 1001;
+}
+
+.preset-expand-tab span {
+  align-items: center;
+  background: #eff6ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 20px;
+  min-width: 20px;
 }
 
 .preset-primary:disabled {
@@ -758,6 +800,12 @@ button {
     top: auto;
     bottom: 16px;
     width: calc(100% - 32px);
+  }
+
+  .preset-expand-tab {
+    bottom: 16px;
+    right: 0;
+    top: auto;
   }
 
   .preset-modal-actions {

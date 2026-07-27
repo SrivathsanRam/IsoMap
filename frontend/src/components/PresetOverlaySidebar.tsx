@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Layers, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import cdcCafes from "../assets/cdc_cafes_singapore.json";
 import famousPlaces from "../assets/famous_places_singapore.json";
 import historicalLandmarks from "../assets/historical_landmarks_singapore.json";
@@ -51,6 +51,7 @@ export function PresetOverlaySidebar({
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<PresetSort>("trending");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
   const [error, setError] = useState("");
 
@@ -136,65 +137,90 @@ export function PresetOverlaySidebar({
 
   return (
     <>
-      <aside className="preset-sidebar">
-        <div className="preset-sidebar-header">
-          <h2>Preset Overlays</h2>
-          <button type="button" onClick={() => setIsCreateOpen(true)}>
-            <Plus size={16} />
-            Create
-          </button>
-        </div>
+      {!isCollapsed && (
+        <aside className="preset-sidebar">
+          <div className="preset-sidebar-header">
+            <h2>Preset Overlays</h2>
+            <div className="preset-sidebar-actions">
+              <button type="button" onClick={() => setIsCreateOpen(true)} title="Create preset">
+                <Plus size={16} />
+                Create
+              </button>
+              <button
+                type="button"
+                className="preset-collapse-button"
+                onClick={() => setIsCollapsed(true)}
+                title="Collapse presets"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
 
-        <input
-          className="preset-search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search presets"
-        />
+          <input
+            className="preset-search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search presets"
+          />
 
-        <div className="preset-sort" aria-label="Community preset sort">
-          <button
-            type="button"
-            className={sort === "trending" ? "active" : ""}
-            onClick={() => setSort("trending")}
-          >
-            Trending
-          </button>
-          <button
-            type="button"
-            className={sort === "top" ? "active" : ""}
-            onClick={() => setSort("top")}
-          >
-            Top
-          </button>
-          <button
-            type="button"
-            className={sort === "new" ? "active" : ""}
-            onClick={() => setSort("new")}
-          >
-            New
-          </button>
-        </div>
+          <div className="preset-sort" aria-label="Community preset sort">
+            <button
+              type="button"
+              className={sort === "trending" ? "active" : ""}
+              onClick={() => setSort("trending")}
+            >
+              Trending
+            </button>
+            <button
+              type="button"
+              className={sort === "top" ? "active" : ""}
+              onClick={() => setSort("top")}
+            >
+              Top
+            </button>
+            <button
+              type="button"
+              className={sort === "new" ? "active" : ""}
+              onClick={() => setSort("new")}
+            >
+              New
+            </button>
+          </div>
 
-        {error && <p className="preset-error">{error}</p>}
-        {isLoadingCommunity && <p className="preset-empty">Loading community presets...</p>}
+          {error && <p className="preset-error">{error}</p>}
+          {isLoadingCommunity && <p className="preset-empty">Loading community presets...</p>}
 
-        <div className="preset-list">
-          {filteredPresets.map((preset) => (
-            <PresetRow
-              key={preset.id}
-              preset={preset}
-              isActive={activePresetIDs.includes(preset.id)}
-              vote={votes[preset.id]}
-              onToggle={() => onTogglePreset(preset)}
-              onVote={(direction) => vote(preset.id, direction)}
-            />
-          ))}
-          {filteredPresets.length === 0 && (
-            <p className="preset-empty">No matching presets.</p>
-          )}
-        </div>
-      </aside>
+          <div className="preset-list">
+            {filteredPresets.map((preset) => (
+              <PresetRow
+                key={preset.id}
+                preset={preset}
+                isActive={activePresetIDs.includes(preset.id)}
+                vote={votes[preset.id]}
+                onToggle={() => onTogglePreset(preset)}
+                onVote={(direction) => vote(preset.id, direction)}
+              />
+            ))}
+            {filteredPresets.length === 0 && (
+              <p className="preset-empty">No matching presets.</p>
+            )}
+          </div>
+        </aside>
+      )}
+
+      {isCollapsed && (
+        <button
+          type="button"
+          className="preset-expand-tab"
+          onClick={() => setIsCollapsed(false)}
+          title="Show preset overlays"
+        >
+          <ChevronLeft size={16} />
+          <Layers size={16} />
+          <span>{activePresetIDs.length}</span>
+        </button>
+      )}
 
       {isCreateOpen && (
         <CreatePresetModal
