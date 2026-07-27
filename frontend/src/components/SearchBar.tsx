@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { CircleDot, Route } from "lucide-react";
+import { Bookmark, BookmarkCheck, CircleDot, History, Route } from "lucide-react";
+import { addressToPlace, placeToAddressRequest } from "../lib/placeAdapters";
+import { useRecentAddresses } from "../lib/useRecentAddresses";
+import { useSavedAddresses } from "../lib/useSavedAddresses";
 
 const mapboxAccessToken =
   import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
@@ -89,6 +92,26 @@ export function SearchBar({
   onRouteSubmit,
   onRouteSelect,
 }: SearchBarProps) {
+  const { recents, addRecent } = useRecentAddresses();
+  const { saved, savePlace, isSaved } = useSavedAddresses();
+
+  const [selectedIsoPlace, setSelectedIsoPlace] = useState<Place | null>(null);
+  const [activePanel, setActivePanel] = useState<"recents" | "saved" | null>(null);
+
+  function selectPlace(place: Place, queryText: string) {
+    addRecent(placeToAddressRequest(place, queryText));
+
+    if (mode === "isochrone") {
+      setSelectedIsoPlace(place);
+      onIsochroneSelect(place);
+    } else {
+      const field: keyof RouteSelection = routeSelection.start ? "end" : "start";
+      onRoutePlaceChange(field, place);
+    }
+
+    setActivePanel(null);
+  }
+
   return (
     <aside className="map-panel">
       <div className="map-mode-toggle" aria-label="Map tool mode">
@@ -112,9 +135,102 @@ export function SearchBar({
         </button>
       </div>
 
+      <div className="panel-shortcuts">
+        <button
+          type="button"
+          className={activePanel === "recents" ? "panel-shortcut active" : "panel-shortcut"}
+          onClick={() => setActivePanel((panel) => (panel === "recents" ? null : "recents"))}
+          title="Recent searches"
+        >
+          <History size={16} />
+          Recent
+        </button>
+        <button
+          type="button"
+          className={activePanel === "saved" ? "panel-shortcut active" : "panel-shortcut"}
+          onClick={() => setActivePanel((panel) => (panel === "saved" ? null : "saved"))}
+          title="Saved places"
+        >
+          <Bookmark size={16} />
+          Saved
+        </button>
+      </div>
+
+      {activePanel === "recents" && (
+        <ul className="shortcut-panel">
+          {recents.length === 0 && <li className="shortcut-empty">No recent searches yet</li>}
+          {recents.map((recent) => (
+            <li key={recent.id}>
+              <button
+                type="button"
+                onClick={() =>
+                  selectPlace(addressToPlace(recent.address), recent.query_text)
+                }
+              >
+                <History size={13} className="shortcut-icon" />
+                {recent.address.formatted_address}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {activePanel === "saved" && (
+        <ul className="shortcut-panel">
+          {saved.length === 0 && <li className="shortcut-empty">No saved places yet</li>}
+          {saved.map((savedPlace) => (
+            <li key={savedPlace.id}>
+              <button
+                type="button"
+                onClick={() =>
+                  selectPlace(
+                    addressToPlace(savedPlace.address),
+                    savedPlace.address.formatted_address,
+                  )
+                }
+              >
+                <Bookmark size={13} className="shortcut-icon" />
+                {savedPlace.nickname
+                  ? `${savedPlace.nickname} - ${savedPlace.address.formatted_address}`
+                  : savedPlace.address.formatted_address}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {mode === "isochrone" ? (
         <>
-          <PlaceInput placeholder="Search Singapore" onSelect={onIsochroneSelect} />
+          <PlaceInput
+            placeholder="Search Singapore"
+            onSelect={(place, queryText) => selectPlace(place, queryText)}
+          />
+
+          {selectedIsoPlace && (
+            <div className="selected-place-row">
+              <p className="selected-place-name">{selectedIsoPlace.display_name}</p>
+              <button
+                type="button"
+                className="save-place-button"
+                onClick={() => savePlace(placeToAddressRequest(selectedIsoPlace))}
+              >
+                {isSaved(
+                  Number(selectedIsoPlace.lat),
+                  Number(selectedIsoPlace.lon),
+                  selectedIsoPlace.display_name,
+                ) ? (
+                  <>
+                    <BookmarkCheck size={14} /> Saved
+                  </>
+                ) : (
+                  <>
+                    <Bookmark size={14} /> Save place
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           <div className="isochrone-slider">
             <div className="isochrone-slider-header">
               <label htmlFor="isochrone-minutes">Travel time</label>
@@ -124,7 +240,7 @@ export function SearchBar({
               id="isochrone-minutes"
               type="range"
               min="5"
-              max="60"
+              max="90"
               step="5"
               value={isochroneMinutes}
               onChange={(event) => onIsochroneMinutesChange(Number(event.target.value))}
@@ -135,6 +251,7 @@ export function SearchBar({
               <span>90</span>
             </div>
           </div>
+
           {isLoading && <p className="map-panel-message">Loading isochrone...</p>}
           {error && <p className="map-panel-error">{error}</p>}
           {isochroneAreaKm2 !== null && (
@@ -154,11 +271,11 @@ export function SearchBar({
           <div className="route-inputs">
             <PlaceInput
               placeholder="Start location"
-              onSelect={(place) => onRoutePlaceChange("start", place)}
+              onSelect={(place, queryText) => selectPlace(place, queryText)}
             />
             <PlaceInput
               placeholder="End location"
-              onSelect={(place) => onRoutePlaceChange("end", place)}
+              onSelect={(place, queryText) => selectPlace(place, queryText)}
             />
             <button
               type="button"
@@ -207,7 +324,7 @@ export function PlaceInput({
   onSelect,
 }: {
   placeholder: string;
-  onSelect: (place: Place) => void;
+  onSelect: (place: Place, queryText: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<MapboxSuggestion[]>([]);
@@ -271,6 +388,7 @@ export function PlaceInput({
       return;
     }
 
+    const submittedQuery = query.trim();
     const params = new URLSearchParams({
       session_token: sessionTokenRef.current,
       access_token: mapboxAccessToken,
@@ -307,7 +425,7 @@ export function PlaceInput({
     setQuery(place.display_name);
     setSuggestions([]);
     sessionTokenRef.current = newSessionToken();
-    onSelect(place);
+    onSelect(place, submittedQuery);
   }
 
   return (
