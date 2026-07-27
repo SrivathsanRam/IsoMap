@@ -25,7 +25,7 @@ export interface IsochroneRequest extends Point {}
 export interface Address {
   id: string;
   formatted_address: string;
-  place_id: string;
+  place_id?: string | null;
   latitude: number;
   longitude: number;
   created_at?: string;

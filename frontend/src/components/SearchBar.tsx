@@ -92,11 +92,30 @@ export function SearchBar({
   onRouteSubmit,
   onRouteSelect,
 }: SearchBarProps) {
-  const { recents, addRecent } = useRecentAddresses();
-  const { saved, savePlace, isSaved } = useSavedAddresses();
+  const {
+    recents,
+    addRecent,
+    error: recentError,
+    isEnabled: canUseRecents,
+  } = useRecentAddresses();
+  const {
+    saved,
+    savePlace,
+    isSaved,
+    isSaving,
+    error: savedError,
+    isEnabled: canUseSaved,
+  } = useSavedAddresses();
 
   const [selectedIsoPlace, setSelectedIsoPlace] = useState<Place | null>(null);
   const [activePanel, setActivePanel] = useState<"recents" | "saved" | null>(null);
+  const selectedIsoSaved =
+    selectedIsoPlace !== null &&
+    isSaved(
+      Number(selectedIsoPlace.lat),
+      Number(selectedIsoPlace.lon),
+      selectedIsoPlace.display_name,
+    );
 
   function selectPlace(place: Place, queryText: string) {
     addRecent(placeToAddressRequest(place, queryText));
@@ -157,10 +176,20 @@ export function SearchBar({
       </div>
 
       {activePanel === "recents" && (
-        <ul className="shortcut-panel">
-          {recents.length === 0 && <li className="shortcut-empty">No recent searches yet</li>}
+        <section className="shortcut-panel" aria-label="Recent searches">
+          <div className="shortcut-panel-header">
+            <strong>Recent searches</strong>
+            <span>{canUseRecents ? "Synced to your account" : "Sign in to sync"}</span>
+          </div>
+          {recentError && <p className="shortcut-error">{recentError}</p>}
+          {!canUseRecents && (
+            <p className="shortcut-empty">Sign in to save recent searches to the database.</p>
+          )}
+          {canUseRecents && recents.length === 0 && (
+            <p className="shortcut-empty">No recent searches yet.</p>
+          )}
           {recents.map((recent) => (
-            <li key={recent.id}>
+            <article key={recent.id} className="shortcut-item">
               <button
                 type="button"
                 onClick={() =>
@@ -168,18 +197,31 @@ export function SearchBar({
                 }
               >
                 <History size={13} className="shortcut-icon" />
-                {recent.address.formatted_address}
+                <span>
+                  <strong>{recent.address.formatted_address}</strong>
+                  {recent.query_text && <small>Search: {recent.query_text}</small>}
+                </span>
               </button>
-            </li>
+            </article>
           ))}
-        </ul>
+        </section>
       )}
 
       {activePanel === "saved" && (
-        <ul className="shortcut-panel">
-          {saved.length === 0 && <li className="shortcut-empty">No saved places yet</li>}
+        <section className="shortcut-panel" aria-label="Saved places">
+          <div className="shortcut-panel-header">
+            <strong>Saved places</strong>
+            <span>{canUseSaved ? "Stored in the database" : "Sign in to save"}</span>
+          </div>
+          {savedError && <p className="shortcut-error">{savedError}</p>}
+          {!canUseSaved && (
+            <p className="shortcut-empty">Sign in to save places to the database.</p>
+          )}
+          {canUseSaved && saved.length === 0 && (
+            <p className="shortcut-empty">No saved places yet.</p>
+          )}
           {saved.map((savedPlace) => (
-            <li key={savedPlace.id}>
+            <article key={savedPlace.id} className="shortcut-item">
               <button
                 type="button"
                 onClick={() =>
@@ -190,13 +232,14 @@ export function SearchBar({
                 }
               >
                 <Bookmark size={13} className="shortcut-icon" />
-                {savedPlace.nickname
-                  ? `${savedPlace.nickname} - ${savedPlace.address.formatted_address}`
-                  : savedPlace.address.formatted_address}
+                <span>
+                  <strong>{savedPlace.nickname || savedPlace.address.formatted_address}</strong>
+                  {savedPlace.nickname && <small>{savedPlace.address.formatted_address}</small>}
+                </span>
               </button>
-            </li>
+            </article>
           ))}
-        </ul>
+        </section>
       )}
 
       {mode === "isochrone" ? (
@@ -212,23 +255,23 @@ export function SearchBar({
               <button
                 type="button"
                 className="save-place-button"
+                disabled={!canUseSaved || isSaving || selectedIsoSaved}
                 onClick={() => savePlace(placeToAddressRequest(selectedIsoPlace))}
               >
-                {isSaved(
-                  Number(selectedIsoPlace.lat),
-                  Number(selectedIsoPlace.lon),
-                  selectedIsoPlace.display_name,
-                ) ? (
+                {selectedIsoSaved ? (
                   <>
                     <BookmarkCheck size={14} /> Saved
                   </>
                 ) : (
                   <>
-                    <Bookmark size={14} /> Save place
+                    <Bookmark size={14} /> {isSaving ? "Saving..." : "Save place"}
                   </>
                 )}
               </button>
             </div>
+          )}
+          {selectedIsoPlace && !canUseSaved && (
+            <p className="map-panel-message">Sign in to save this place to the database.</p>
           )}
 
           <div className="isochrone-slider">

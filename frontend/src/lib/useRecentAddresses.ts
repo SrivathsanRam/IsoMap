@@ -6,6 +6,7 @@ import type { AddressSearch, AddressRequest } from "@/types";
 export function useRecentAddresses(limit = 5) {
   const { user, isGuest } = useAuth();
   const [recents, setRecents] = useState<AddressSearch[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let isActive = true;
@@ -13,16 +14,19 @@ export function useRecentAddresses(limit = 5) {
     async function loadRecents() {
       if (!user || isGuest) {
         setRecents([]);
+        setError("");
         return;
       }
       try {
         const addresses = await api.getRecentAddresses(user.id, limit);
         if (isActive) {
           setRecents(addresses);
+          setError("");
         }
       } catch {
         if (isActive) {
           setRecents([]);
+          setError("Could not load recent searches");
         }
       }
     }
@@ -36,12 +40,15 @@ export function useRecentAddresses(limit = 5) {
   const refresh = useCallback(async () => {
     if (!user || isGuest) {
       setRecents([]);
+      setError("");
       return;
     }
     try {
       setRecents(await api.getRecentAddresses(user.id, limit));
+      setError("");
     } catch {
       setRecents([]);
+      setError("Could not load recent searches");
     }
   }, [user, isGuest, limit]);
 
@@ -49,11 +56,11 @@ export function useRecentAddresses(limit = 5) {
     if (!user || isGuest) return;
     try {
       await api.createRecentAddress(user.id, data);
-      refresh();
+      await refresh();
     } catch {
-      // search history is non-critical — fail silently
+      setError("Could not save recent search");
     }
   }, [user, isGuest, refresh]);
 
-  return { recents, addRecent, isEnabled: !!user && !isGuest };
+  return { recents, addRecent, error, isEnabled: !!user && !isGuest };
 }
