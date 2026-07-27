@@ -27,8 +27,8 @@ export type PresetOverlay = {
 
 type PresetOverlaySidebarProps = {
   activePresetIDs: string[];
-  onTogglePreset: (presetID: string) => void;
-  onPresetsChange: (presets: PresetOverlay[]) => void;
+  onPresetCreated: (preset: PresetOverlay) => void;
+  onTogglePreset: (preset: PresetOverlay) => void;
 };
 
 const providedPresets: PresetOverlay[] = [
@@ -85,8 +85,8 @@ const initialCommunityPresets: PresetOverlay[] = [
 
 export function PresetOverlaySidebar({
   activePresetIDs,
+  onPresetCreated,
   onTogglePreset,
-  onPresetsChange,
 }: PresetOverlaySidebarProps) {
   const [communityPresets, setCommunityPresets] = useState(loadCommunityPresets);
   const [votes, setVotes] = useState(loadVotes);
@@ -118,7 +118,7 @@ export function PresetOverlaySidebar({
     const nextPresets = [preset, ...communityPresets];
     setCommunityPresets(nextPresets);
     saveCommunityPresets(nextPresets);
-    onPresetsChange([...providedPresets, ...nextPresets]);
+    onPresetCreated(preset);
     setIsCreateOpen(false);
   }
 
@@ -157,7 +157,7 @@ export function PresetOverlaySidebar({
               preset={preset}
               isActive={activePresetIDs.includes(preset.id)}
               vote={votes[preset.id]}
-              onToggle={() => onTogglePreset(preset.id)}
+              onToggle={() => onTogglePreset(preset)}
               onVote={(direction) => vote(preset.id, direction)}
             />
           ))}

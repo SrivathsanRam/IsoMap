@@ -10,11 +10,16 @@ import {
   type Place,
   type RouteSummary,
 } from "./SearchBar";
+import {
+  PresetOverlaySidebar,
+  type PresetOverlay,
+} from "./PresetOverlaySidebar";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const mapboxAccessToken =
   import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const singapore: L.LatLngExpression = [1.3521, 103.8198];
+const overlayColors = ["#f97316", "#16a34a", "#dc2626", "#7c3aed", "#0891b2", "#ca8a04"];
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -42,6 +47,7 @@ export function Map() {
   const routeMarkersRef = useRef<L.Marker[]>([]);
   const polygonRef = useRef<L.Polygon | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
+  const presetLayerRef = useRef<L.LayerGroup | null>(null);
   const isochroneRequestRef = useRef(0);
 
   const [mode, setMode] = useState<MapToolMode>("isochrone");
@@ -51,6 +57,8 @@ export function Map() {
   const [isochronePlace, setIsochronePlace] = useState<Place | null>(null);
   const [isochroneMinutes, setIsochroneMinutes] = useState(15);
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
+  const [presets, setPresets] = useState<PresetOverlay[]>([]);
+  const [activePresetIDs, setActivePresetIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(mapboxAccessToken ? "" : "MAPBOX_ACCESS_TOKEN is not set.");
 
@@ -73,12 +81,18 @@ export function Map() {
       ).addTo(map);
     }
     mapRef.current = map;
+    presetLayerRef.current = L.layerGroup().addTo(map);
 
     return () => {
       map.remove();
       mapRef.current = null;
+      presetLayerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    drawPresetOverlays();
+  }, [activePresetIDs, presets]);
 
   function changeMode(nextMode: MapToolMode) {
     setMode(nextMode);
@@ -233,6 +247,53 @@ export function Map() {
     routeMarkersRef.current = [];
   }
 
+  function createPresetOverlay(preset: PresetOverlay) {
+    setPresets((current) => upsertPreset(current, preset));
+    setActivePresetIDs((current) => [...current.filter((presetID) => presetID !== preset.id), preset.id]);
+  }
+
+  function togglePreset(preset: PresetOverlay) {
+    setPresets((current) => upsertPreset(current, preset));
+    setActivePresetIDs((current) =>
+      current.includes(preset.id)
+        ? current.filter((activePresetID) => activePresetID !== preset.id)
+        : [...current, preset.id],
+    );
+  }
+
+  function drawPresetOverlays() {
+    const map = mapRef.current;
+    const presetLayer = presetLayerRef.current;
+    if (!map || !presetLayer) {
+      return;
+    }
+
+    presetLayer.clearLayers();
+    const activePresets = presets.filter((preset) => activePresetIDs.includes(preset.id));
+    const bounds: L.LatLngExpression[] = [];
+
+    activePresets.forEach((preset, presetIndex) => {
+      const color = overlayColors[presetIndex % overlayColors.length];
+      preset.locations.forEach((location) => {
+        const position: L.LatLngExpression = [location.latitude, location.longitude];
+        bounds.push(position);
+        L.circleMarker(position, {
+          radius: 7,
+          color,
+          fillColor: color,
+          fillOpacity: 0.82,
+          weight: 2,
+        })
+          .bindPopup(`<strong>${escapeHTML(location.name)}</strong><br>${escapeHTML(location.address)}`)
+          .addTo(presetLayer);
+      });
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
+    }
+  }
+
   return (
     <main className="screen">
       <SearchBar
@@ -250,6 +311,11 @@ export function Map() {
         onRoutePlaceChange={changeRoutePlace}
         onRouteSubmit={submitRoute}
         onRouteSelect={selectRoute}
+      />
+      <PresetOverlaySidebar
+        activePresetIDs={activePresetIDs}
+        onPresetCreated={createPresetOverlay}
+        onTogglePreset={togglePreset}
       />
       <div ref={elementRef} className="map" />
     </main>
@@ -287,4 +353,18 @@ function calculatePolygonAreaKm2(points: Point[]) {
 
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
+}
+
+function escapeHTML(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function upsertPreset(presets: PresetOverlay[], preset: PresetOverlay) {
+  const withoutPreset = presets.filter((current) => current.id !== preset.id);
+  return [...withoutPreset, preset];
 }
