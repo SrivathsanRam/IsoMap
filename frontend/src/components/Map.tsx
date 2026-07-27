@@ -91,7 +91,36 @@ export function Map() {
   }, []);
 
   useEffect(() => {
-    drawPresetOverlays();
+    const map = mapRef.current;
+    const presetLayer = presetLayerRef.current;
+    if (!map || !presetLayer) {
+      return;
+    }
+
+    presetLayer.clearLayers();
+    const activePresets = presets.filter((preset) => activePresetIDs.includes(preset.id));
+    const bounds: L.LatLngExpression[] = [];
+
+    activePresets.forEach((preset, presetIndex) => {
+      const color = overlayColors[presetIndex % overlayColors.length];
+      preset.locations.forEach((location) => {
+        const position: L.LatLngExpression = [location.latitude, location.longitude];
+        bounds.push(position);
+        L.circleMarker(position, {
+          radius: 7,
+          color,
+          fillColor: color,
+          fillOpacity: 0.82,
+          weight: 2,
+        })
+          .bindPopup(`<strong>${escapeHTML(location.name)}</strong><br>${escapeHTML(location.address)}`)
+          .addTo(presetLayer);
+      });
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
+    }
   }, [activePresetIDs, presets]);
 
   function changeMode(nextMode: MapToolMode) {
@@ -261,39 +290,6 @@ export function Map() {
     );
   }
 
-  function drawPresetOverlays() {
-    const map = mapRef.current;
-    const presetLayer = presetLayerRef.current;
-    if (!map || !presetLayer) {
-      return;
-    }
-
-    presetLayer.clearLayers();
-    const activePresets = presets.filter((preset) => activePresetIDs.includes(preset.id));
-    const bounds: L.LatLngExpression[] = [];
-
-    activePresets.forEach((preset, presetIndex) => {
-      const color = overlayColors[presetIndex % overlayColors.length];
-      preset.locations.forEach((location) => {
-        const position: L.LatLngExpression = [location.latitude, location.longitude];
-        bounds.push(position);
-        L.circleMarker(position, {
-          radius: 7,
-          color,
-          fillColor: color,
-          fillOpacity: 0.82,
-          weight: 2,
-        })
-          .bindPopup(`<strong>${escapeHTML(location.name)}</strong><br>${escapeHTML(location.address)}`)
-          .addTo(presetLayer);
-      });
-    });
-
-    if (bounds.length > 0) {
-      map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
-    }
-  }
-
   return (
     <main className="screen">
       <SearchBar
@@ -357,11 +353,11 @@ function toRadians(value: number) {
 
 function escapeHTML(value: string) {
   return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function upsertPreset(presets: PresetOverlay[], preset: PresetOverlay) {
