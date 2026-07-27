@@ -291,7 +291,7 @@ function PlaceInput({
     }
 
     const [lon, lat] = feature.geometry.coordinates;
-    const displayName = formatSuggestion({
+    const displayName = primarySuggestionLabel({
       name: feature.properties.name,
       full_address: feature.properties.full_address,
       place_formatted: feature.properties.place_formatted,
@@ -322,7 +322,10 @@ function PlaceInput({
           {suggestions.map((suggestion) => (
             <li key={suggestion.mapbox_id}>
               <button type="button" onClick={() => select(suggestion)}>
-                {formatSuggestion(suggestion)}
+                <strong>{primarySuggestionLabel(suggestion)}</strong>
+                {secondarySuggestionLabel(suggestion) && (
+                  <span>{secondarySuggestionLabel(suggestion)}</span>
+                )}
               </button>
             </li>
           ))}
@@ -336,14 +339,17 @@ function newSessionToken() {
   return crypto.randomUUID();
 }
 
-function formatSuggestion(suggestion: MapboxSuggestion) {
-  if (suggestion.full_address) {
-    return suggestion.full_address;
+function primarySuggestionLabel(suggestion: MapboxSuggestion) {
+  return suggestion.name_preferred || suggestion.name;
+}
+
+function secondarySuggestionLabel(suggestion: MapboxSuggestion) {
+  const primary = primarySuggestionLabel(suggestion);
+  const secondary = suggestion.full_address || suggestion.place_formatted;
+  if (!secondary || secondary === primary) {
+    return "";
   }
-  if (suggestion.place_formatted) {
-    return `${suggestion.name}, ${suggestion.place_formatted}`;
-  }
-  return suggestion.name;
+  return secondary;
 }
 
 function formatDuration(seconds: number) {

@@ -131,6 +131,8 @@ button {
   background: white;
   border: 0;
   color: #17202a;
+  display: grid;
+  gap: 3px;
   padding: 10px 12px;
   text-align: left;
   width: 100%;
@@ -138,6 +140,18 @@ button {
 
 .place-input button:hover {
   background: #f8fafc;
+}
+
+.place-input button strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.place-input button span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .isochrone-slider {
