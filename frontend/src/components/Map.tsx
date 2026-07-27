@@ -12,6 +12,7 @@ import {
 } from "./SearchBar";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const singapore: L.LatLngExpression = [1.3521, 103.8198];
 
 L.Icon.Default.mergeOptions({
@@ -58,9 +59,20 @@ export function Map() {
     }
 
     const map = L.map(elementRef.current).setView(singapore, 12);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    if (mapboxAccessToken) {
+      L.tileLayer(
+        `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`,
+        {
+          attribution:
+            '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+          tileSize: 512,
+          zoomOffset: -1,
+        },
+      ).addTo(map);
+    } else {
+      setError("VITE_MAPBOX_ACCESS_TOKEN is not set.");
+    }
     mapRef.current = map;
 
     return () => {
