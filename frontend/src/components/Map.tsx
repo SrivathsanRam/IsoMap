@@ -12,7 +12,8 @@ import {
 } from "./SearchBar";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const mapboxAccessToken =
+  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const singapore: L.LatLngExpression = [1.3521, 103.8198];
 
 L.Icon.Default.mergeOptions({
@@ -51,7 +52,7 @@ export function Map() {
   const [isochroneMinutes, setIsochroneMinutes] = useState(15);
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(mapboxAccessToken ? "" : "MAPBOX_ACCESS_TOKEN is not set.");
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) {
@@ -70,8 +71,6 @@ export function Map() {
           zoomOffset: -1,
         },
       ).addTo(map);
-    } else {
-      setError("VITE_MAPBOX_ACCESS_TOKEN is not set.");
     }
     mapRef.current = map;
 

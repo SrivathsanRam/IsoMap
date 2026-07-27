@@ -1,10 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CircleDot, Route } from "lucide-react";
+
+const mapboxAccessToken =
+  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const mapboxSearchboxURL = "https://api.mapbox.com/search/searchbox/v1";
+const singaporeProximity = "103.8198,1.3521";
 
 export type Place = {
   display_name: string;
   lat: string;
   lon: string;
+};
+
+type MapboxSuggestion = {
+  name: string;
+  name_preferred?: string;
+  mapbox_id: string;
+  full_address?: string;
+  place_formatted?: string;
+};
+
+type MapboxSuggestResponse = {
+  suggestions: MapboxSuggestion[];
+};
+
+type MapboxRetrieveResponse = {
+  features: {
+    geometry: {
+      coordinates: [number, number];
+    };
+    properties: {
+      name: string;
+      full_address?: string;
+      place_formatted?: string;
+    };
+  }[];
 };
 
 export type MapToolMode = "isochrone" | "routing";
@@ -180,10 +210,18 @@ function PlaceInput({
   onSelect: (place: Place) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [places, setPlaces] = useState<Place[]>([]);
+  const [suggestions, setSuggestions] = useState<MapboxSuggestion[]>([]);
+  const sessionTokenRef = useRef(newSessionToken());
+  const selectedQueryRef = useRef("");
 
   useEffect(() => {
     if (query.trim().length < 2) {
+      return;
+    }
+    if (query === selectedQueryRef.current) {
+      return;
+    }
+    if (!mapboxAccessToken) {
       return;
     }
 
@@ -191,21 +229,25 @@ function PlaceInput({
     const timeout = window.setTimeout(async () => {
       try {
         const params = new URLSearchParams({
-          q: query,
-          format: "jsonv2",
-          "accept-language": "en",
-          bounded: "1",
-          countrycodes: "sg",
+          q: query.trim(),
+          session_token: sessionTokenRef.current,
+          proximity: singaporeProximity,
+          country: "SG",
+          language: "en",
           limit: "8",
-          viewbox: "103.5935,1.4756,104.1076,1.1304",
+          access_token: mapboxAccessToken,
         });
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+        const response = await fetch(`${mapboxSearchboxURL}/suggest?${params}`, {
           signal: controller.signal,
         });
-        setPlaces(await response.json());
+        if (!response.ok) {
+          throw new Error("Could not load suggestions.");
+        }
+        const data = (await response.json()) as MapboxSuggestResponse;
+        setSuggestions(data.suggestions ?? []);
       } catch {
         if (!controller.signal.aborted) {
-          setPlaces([]);
+          setSuggestions([]);
         }
       }
     }, 300);
@@ -217,15 +259,54 @@ function PlaceInput({
   }, [query]);
 
   function changeQuery(value: string) {
+    selectedQueryRef.current = "";
     setQuery(value);
     if (value.trim().length < 2) {
-      setPlaces([]);
+      setSuggestions([]);
     }
   }
 
-  function select(place: Place) {
+  async function select(suggestion: MapboxSuggestion) {
+    if (!mapboxAccessToken) {
+      return;
+    }
+
+    const params = new URLSearchParams({
+      session_token: sessionTokenRef.current,
+      access_token: mapboxAccessToken,
+    });
+    const response = await fetch(
+      `${mapboxSearchboxURL}/retrieve/${encodeURIComponent(suggestion.mapbox_id)}?${params}`,
+    );
+    if (!response.ok) {
+      setSuggestions([]);
+      return;
+    }
+
+    const data = (await response.json()) as MapboxRetrieveResponse;
+    const feature = data.features[0];
+    if (!feature) {
+      setSuggestions([]);
+      return;
+    }
+
+    const [lon, lat] = feature.geometry.coordinates;
+    const displayName = formatSuggestion({
+      name: feature.properties.name,
+      full_address: feature.properties.full_address,
+      place_formatted: feature.properties.place_formatted,
+      mapbox_id: suggestion.mapbox_id,
+    });
+    const place = {
+      display_name: displayName,
+      lat: String(lat),
+      lon: String(lon),
+    };
+
+    selectedQueryRef.current = displayName;
     setQuery(place.display_name);
-    setPlaces([]);
+    setSuggestions([]);
+    sessionTokenRef.current = newSessionToken();
     onSelect(place);
   }
 
@@ -236,12 +317,12 @@ function PlaceInput({
         onChange={(event) => changeQuery(event.target.value)}
         placeholder={placeholder}
       />
-      {places.length > 0 && (
+      {suggestions.length > 0 && (
         <ul>
-          {places.map((place) => (
-            <li key={`${place.lat}-${place.lon}-${place.display_name}`}>
-              <button type="button" onClick={() => select(place)}>
-                {place.display_name}
+          {suggestions.map((suggestion) => (
+            <li key={suggestion.mapbox_id}>
+              <button type="button" onClick={() => select(suggestion)}>
+                {formatSuggestion(suggestion)}
               </button>
             </li>
           ))}
@@ -249,6 +330,20 @@ function PlaceInput({
       )}
     </div>
   );
+}
+
+function newSessionToken() {
+  return crypto.randomUUID();
+}
+
+function formatSuggestion(suggestion: MapboxSuggestion) {
+  if (suggestion.full_address) {
+    return suggestion.full_address;
+  }
+  if (suggestion.place_formatted) {
+    return `${suggestion.name}, ${suggestion.place_formatted}`;
+  }
+  return suggestion.name;
 }
 
 function formatDuration(seconds: number) {
