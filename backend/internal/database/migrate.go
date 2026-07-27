@@ -13,6 +13,8 @@ func (database *Database) Migrate() error {
 		&models.SavedAddress{},
 		&models.Outing{},
 		&models.OutingMember{},
+		&models.CommunityPreset{},
+		&models.CommunityPresetLocation{},
 	)
 
 	if err != nil {
