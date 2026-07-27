@@ -124,7 +124,7 @@ export function SearchBar({
               id="isochrone-minutes"
               type="range"
               min="5"
-              max="90"
+              max="60"
               step="5"
               value={isochroneMinutes}
               onChange={(event) => onIsochroneMinutesChange(Number(event.target.value))}
@@ -202,7 +202,7 @@ export function SearchBar({
   );
 }
 
-function PlaceInput({
+export function PlaceInput({
   placeholder,
   onSelect,
 }: {
