@@ -192,6 +192,15 @@ button {
   margin: 0;
 }
 
+.preset-error {
+  background: #fef2f2;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+  margin: 0;
+  padding: 9px 10px;
+}
+
 .preset-modal-backdrop {
   align-items: center;
   background: rgb(15 23 42 / 42%);

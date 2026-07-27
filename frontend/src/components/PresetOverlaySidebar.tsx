@@ -1,13 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import cdcCafes from "../assets/cdc_cafes_singapore.json";
 import famousPlaces from "../assets/famous_places_singapore.json";
 import historicalLandmarks from "../assets/historical_landmarks_singapore.json";
 import malls from "../assets/malls_singapore.json";
+import {
+  createCommunityPreset,
+  listCommunityPresets,
+  voteCommunityPreset,
+} from "../lib/api";
 import { Place, PlaceInput } from "./SearchBar";
-
-const communityPresetKey = "isomap-community-presets";
-const presetVoteKey = "isomap-community-preset-votes";
 
 export type PresetLocation = {
   name: string;
@@ -38,60 +40,17 @@ const providedPresets: PresetOverlay[] = [
   makeProvidedPreset("provided-malls", "Shopping Malls", malls),
 ].filter((preset) => preset.locations.length > 0);
 
-const initialCommunityPresets: PresetOverlay[] = [
-  {
-    id: "community-study-spots",
-    name: "Community Study Spots",
-    source: "community",
-    upvotes: 12,
-    downvotes: 2,
-    locations: [
-      {
-        name: "NUS Central Library",
-        address: "12 Kent Ridge Crescent, Singapore",
-        latitude: 1.2966,
-        longitude: 103.7738,
-      },
-      {
-        name: "library@orchard",
-        address: "277 Orchard Road, Singapore",
-        latitude: 1.3015,
-        longitude: 103.8374,
-      },
-    ],
-  },
-  {
-    id: "community-weekend-food",
-    name: "Weekend Food Trail",
-    source: "community",
-    upvotes: 8,
-    downvotes: 1,
-    locations: [
-      {
-        name: "Lau Pa Sat",
-        address: "18 Raffles Quay, Singapore",
-        latitude: 1.2807,
-        longitude: 103.8504,
-      },
-      {
-        name: "Tiong Bahru Market",
-        address: "30 Seng Poh Road, Singapore",
-        latitude: 1.2852,
-        longitude: 103.8321,
-      },
-    ],
-  },
-];
-
 export function PresetOverlaySidebar({
   activePresetIDs,
   onPresetCreated,
   onTogglePreset,
 }: PresetOverlaySidebarProps) {
-  const [communityPresets, setCommunityPresets] = useState(loadCommunityPresets);
-  const [votes, setVotes] = useState(loadVotes);
+  const [communityPresets, setCommunityPresets] = useState<PresetOverlay[]>([]);
+  const [votes, setVotes] = useState<Record<string, "up" | "down" | undefined>>({});
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
+  const [error, setError] = useState("");
 
   const presets = useMemo(
     () => [...providedPresets, ...communityPresets],
@@ -114,22 +73,63 @@ export function PresetOverlaySidebar({
     });
   }, [presets, query]);
 
-  function submitPreset(preset: PresetOverlay) {
-    const nextPresets = [preset, ...communityPresets];
-    setCommunityPresets(nextPresets);
-    saveCommunityPresets(nextPresets);
-    onPresetCreated(preset);
-    setIsCreateOpen(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setIsLoadingCommunity(true);
+      setError("");
+      try {
+        const presets = await listCommunityPresets(query);
+        if (!controller.signal.aborted) {
+          setCommunityPresets(presets);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : "Failed to load community presets");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingCommunity(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [query]);
+
+  async function submitPreset(preset: PresetOverlay) {
+    setError("");
+    try {
+      const createdPreset = await createCommunityPreset({
+        name: preset.name,
+        locations: preset.locations,
+      });
+      setCommunityPresets((current) => [createdPreset, ...current]);
+      onPresetCreated(createdPreset);
+      setIsCreateOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create preset");
+    }
   }
 
-  function vote(presetID: string, direction: "up" | "down") {
+  async function vote(presetID: string, direction: "up" | "down") {
     const current = votes[presetID];
+    const nextVote = current === direction ? "" : direction;
     const nextVotes = {
       ...votes,
-      [presetID]: current === direction ? undefined : direction,
+      [presetID]: nextVote || undefined,
     };
     setVotes(nextVotes);
-    saveVotes(nextVotes);
+    try {
+      const updatedPreset = await voteCommunityPreset(presetID, nextVote, current ?? "");
+      setCommunityPresets((presets) => upsertPreset(presets, updatedPreset));
+    } catch (err) {
+      setVotes(votes);
+      setError(err instanceof Error ? err.message : "Failed to update vote");
+    }
   }
 
   return (
@@ -149,6 +149,9 @@ export function PresetOverlaySidebar({
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search presets"
         />
+
+        {error && <p className="preset-error">{error}</p>}
+        {isLoadingCommunity && <p className="preset-empty">Loading community presets...</p>}
 
         <div className="preset-list">
           {filteredPresets.map((preset) => (
@@ -257,7 +260,7 @@ function CreatePresetModal({
       return;
     }
     onSubmit({
-      id: `community-${crypto.randomUUID()}`,
+      id: "",
       name: trimmedName,
       source: "community",
       upvotes: 0,
@@ -348,32 +351,7 @@ function placeToPresetLocation(place: Place): PresetLocation {
   };
 }
 
-function loadCommunityPresets() {
-  try {
-    const raw = localStorage.getItem(communityPresetKey);
-    if (!raw) {
-      return initialCommunityPresets;
-    }
-    const parsed = JSON.parse(raw) as PresetOverlay[];
-    return parsed.length > 0 ? parsed : initialCommunityPresets;
-  } catch {
-    return initialCommunityPresets;
-  }
-}
-
-function saveCommunityPresets(presets: PresetOverlay[]) {
-  localStorage.setItem(communityPresetKey, JSON.stringify(presets));
-}
-
-function loadVotes() {
-  try {
-    const raw = localStorage.getItem(presetVoteKey);
-    return raw ? (JSON.parse(raw) as Record<string, "up" | "down" | undefined>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveVotes(votes: Record<string, "up" | "down" | undefined>) {
-  localStorage.setItem(presetVoteKey, JSON.stringify(votes));
+function upsertPreset(presets: PresetOverlay[], preset: PresetOverlay) {
+  const withoutPreset = presets.filter((current) => current.id !== preset.id);
+  return [preset, ...withoutPreset];
 }
