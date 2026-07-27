@@ -89,8 +89,8 @@ func fetchIsochrone(body isochroneRequest) ([]point, error) {
 	if minutes < 5 {
 		minutes = 15
 	}
-	if minutes > 90 {
-		minutes = 90
+	if minutes > 60 {
+		minutes = 60
 	}
 
 	query.Set("contours_minutes", fmt.Sprintf("%d", minutes))
