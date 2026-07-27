@@ -40,11 +40,14 @@ export function Map() {
   const routeMarkersRef = useRef<L.Marker[]>([]);
   const polygonRef = useRef<L.Polygon | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
+  const isochroneRequestRef = useRef(0);
 
   const [mode, setMode] = useState<MapToolMode>("isochrone");
   const [routeSelection, setRouteSelection] = useState<Partial<{ start: Place; end: Place }>>({});
   const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [activeRouteIndex, setActiveRouteIndex] = useState(0);
+  const [isochronePlace, setIsochronePlace] = useState<Place | null>(null);
+  const [isochroneMinutes, setIsochroneMinutes] = useState(15);
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,11 +73,27 @@ export function Map() {
     setMode(nextMode);
     clearMapLayers();
     setRoutes([]);
+    setIsochronePlace(null);
     setIsochroneAreaKm2(null);
     setError("");
   }
 
   async function selectIsochronePlace(place: Place) {
+    setIsochronePlace(place);
+    await drawIsochrone(place, isochroneMinutes);
+  }
+
+  async function changeIsochroneMinutes(minutes: number) {
+    setIsochroneMinutes(minutes);
+    if (isochronePlace) {
+      await drawIsochrone(isochronePlace, minutes);
+    }
+  }
+
+  async function drawIsochrone(place: Place, minutes: number) {
+    const requestID = isochroneRequestRef.current + 1;
+    isochroneRequestRef.current = requestID;
+
     const lat = Number(place.lat);
     const lon = Number(place.lon);
     const map = mapRef.current;
@@ -92,12 +111,16 @@ export function Map() {
       const response = await fetch(`${api}/isochrone`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lat, lon }),
+        body: JSON.stringify({ lat, lon, minutes }),
       });
       if (!response.ok) {
         throw new Error("Could not load isochrone.");
       }
       const points = (await response.json()) as Point[];
+      if (requestID !== isochroneRequestRef.current) {
+        return;
+      }
+
       const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
 
       polygonRef.current = L.polygon(polygon, {
@@ -108,9 +131,13 @@ export function Map() {
       setIsochroneAreaKm2(calculatePolygonAreaKm2(points));
       map.fitBounds(polygonRef.current.getBounds());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load isochrone.");
+      if (requestID === isochroneRequestRef.current) {
+        setError(err instanceof Error ? err.message : "Could not load isochrone.");
+      }
     } finally {
-      setIsLoading(false);
+      if (requestID === isochroneRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -201,12 +228,14 @@ export function Map() {
         mode={mode}
         routeSelection={routeSelection}
         isochroneAreaKm2={isochroneAreaKm2}
+        isochroneMinutes={isochroneMinutes}
         routeResults={routes}
         activeRouteIndex={activeRouteIndex}
         isLoading={isLoading}
         error={error}
         onModeChange={changeMode}
         onIsochroneSelect={selectIsochronePlace}
+        onIsochroneMinutesChange={changeIsochroneMinutes}
         onRoutePlaceChange={changeRoutePlace}
         onRouteSubmit={submitRoute}
         onRouteSelect={selectRoute}

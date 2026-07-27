@@ -18,12 +18,14 @@ type SearchBarProps = {
   mode: MapToolMode;
   routeSelection: Partial<RouteSelection>;
   isochroneAreaKm2: number | null;
+  isochroneMinutes: number;
   routeResults: RouteSummary[];
   activeRouteIndex: number;
   isLoading: boolean;
   error: string;
   onModeChange: (mode: MapToolMode) => void;
   onIsochroneSelect: (place: Place) => void;
+  onIsochroneMinutesChange: (minutes: number) => void;
   onRoutePlaceChange: (field: keyof RouteSelection, place: Place) => void;
   onRouteSubmit: () => void;
   onRouteSelect: (index: number) => void;
@@ -45,12 +47,14 @@ export function SearchBar({
   mode,
   routeSelection,
   isochroneAreaKm2,
+  isochroneMinutes,
   routeResults,
   activeRouteIndex,
   isLoading,
   error,
   onModeChange,
   onIsochroneSelect,
+  onIsochroneMinutesChange,
   onRoutePlaceChange,
   onRouteSubmit,
   onRouteSelect,
@@ -81,7 +85,28 @@ export function SearchBar({
       {mode === "isochrone" ? (
         <>
           <PlaceInput placeholder="Search Singapore" onSelect={onIsochroneSelect} />
+          <div className="isochrone-slider">
+            <div className="isochrone-slider-header">
+              <label htmlFor="isochrone-minutes">Travel time</label>
+              <strong>{isochroneMinutes} min</strong>
+            </div>
+            <input
+              id="isochrone-minutes"
+              type="range"
+              min="5"
+              max="90"
+              step="5"
+              value={isochroneMinutes}
+              onChange={(event) => onIsochroneMinutesChange(Number(event.target.value))}
+            />
+            <div className="isochrone-slider-scale" aria-hidden="true">
+              <span>5</span>
+              <span>45</span>
+              <span>90</span>
+            </div>
+          </div>
           {isLoading && <p className="map-panel-message">Loading isochrone...</p>}
+          {error && <p className="map-panel-error">{error}</p>}
           {isochroneAreaKm2 !== null && (
             <div className="map-panel-section">
               <h3>Isochrone statistics</h3>
