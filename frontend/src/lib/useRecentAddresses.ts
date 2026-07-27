@@ -7,17 +7,43 @@ export function useRecentAddresses(limit = 5) {
   const { user, isGuest } = useAuth();
   const [recents, setRecents] = useState<AddressSearch[]>([]);
 
-  const refresh = useCallback(() => {
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadRecents() {
+      if (!user || isGuest) {
+        setRecents([]);
+        return;
+      }
+      try {
+        const addresses = await api.getRecentAddresses(user.id, limit);
+        if (isActive) {
+          setRecents(addresses);
+        }
+      } catch {
+        if (isActive) {
+          setRecents([]);
+        }
+      }
+    }
+
+    void loadRecents();
+    return () => {
+      isActive = false;
+    };
+  }, [user, isGuest, limit]);
+
+  const refresh = useCallback(async () => {
     if (!user || isGuest) {
       setRecents([]);
       return;
     }
-    api.getRecentAddresses(user.id, limit)
-      .then(setRecents)
-      .catch(() => setRecents([]));
+    try {
+      setRecents(await api.getRecentAddresses(user.id, limit));
+    } catch {
+      setRecents([]);
+    }
   }, [user, isGuest, limit]);
-
-  useEffect(() => { refresh(); }, [refresh]);
 
   const addRecent = useCallback(async (data: AddressRequest) => {
     if (!user || isGuest) return;

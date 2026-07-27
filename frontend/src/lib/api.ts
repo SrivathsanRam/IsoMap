@@ -37,6 +37,22 @@ export type Point = {
   lon: number;
 };
 
+export type PresetLocationPayload = {
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type PresetOverlayPayload = {
+  id: string;
+  name: string;
+  source: "community";
+  locations: PresetLocationPayload[];
+  upvotes: number;
+  downvotes: number;
+};
+
 export async function createRecentAddress(userId: string, address: AddressPayload) {
   const response = await fetch(`${API_URL}/users/${userId}/recent-addresses`, {
     method: "POST",
@@ -169,4 +185,58 @@ export async function getIsochrone(point: Point, minutes: number) {
   }
 
   return (await response.json()) as Point[];
+}
+
+export type PresetSort = "new" | "top" | "trending";
+
+export async function listCommunityPresets(query = "", sort: PresetSort = "new") {
+  const params = new URLSearchParams();
+  if (query.trim()) {
+    params.set("q", query.trim());
+  }
+  if (sort !== "new") {
+    params.set("sort", sort);
+  }
+  const response = await fetch(`${API_URL}/presets${params.size > 0 ? `?${params}` : ""}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load community presets");
+  }
+
+  return (await response.json()) as PresetOverlayPayload[];
+}
+
+export async function createCommunityPreset(data: {
+  name: string;
+  locations: PresetLocationPayload[];
+}) {
+  const response = await fetch(`${API_URL}/presets`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create community preset");
+  }
+
+  return (await response.json()) as PresetOverlayPayload;
+}
+
+export async function voteCommunityPreset(
+  presetId: string,
+  vote: "up" | "down" | "",
+  previousVote: "up" | "down" | "",
+) {
+  const response = await fetch(`${API_URL}/presets/${presetId}/vote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ vote, previous_vote: previousVote }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update preset vote");
+  }
+
+  return (await response.json()) as PresetOverlayPayload;
 }

@@ -1,0 +1,226 @@
+[
+    {
+        "name": "Repose Bakery",
+        "address": "2 Everton Park, #01-59C, Singapore 081002",
+        "latitude": 1.416106,
+        "longitude": 103.780566,
+        "stars": 4.6
+    },
+    {
+        "name": "Bored Tacos",
+        "address": "315 Joo Chiat Road, #01-01 Singapore 427566",
+        "latitude": 1.299296,
+        "longitude": 103.734835,
+        "stars": 4.9
+    },
+    {
+        "name": "SOD Cafe",
+        "address": "51 Hougang Avenue 9 #01-03, Singapore 538776",
+        "latitude": 1.28444,
+        "longitude": 103.801377,
+        "stars": 4.1
+    },
+    {
+        "name": "Marlow's Deli",
+        "address": "162 Joo Chiat Road, #01-01, Singapore 427437",
+        "latitude": 1.286159,
+        "longitude": 103.801956,
+        "stars": 4.4
+    },
+    {
+        "name": "Cheeky Cuppas",
+        "address": "24 Sin Ming Road, #01-47A Singapore 570024",
+        "latitude": 1.360332,
+        "longitude": 103.87485,
+        "stars": 4.2
+    },
+    {
+        "name": "Duo Duo Dou",
+        "address": "121 Hougang Avenue 1, #01-1348A, Singapore 530121",
+        "latitude": 1.305115,
+        "longitude": 103.827218,
+        "stars": 4.3
+    },
+    {
+        "name": "Elijah Pies",
+        "address": "7 Tanjong Pagar Plz, #01-102, Singapore 081007",
+        "latitude": 1.375565,
+        "longitude": 103.847609,
+        "stars": 4.5
+    },
+    {
+        "name": "Gusta Sourdough Pizza Co.",
+        "address": "326 Serangoon Ave 3, #01-378, Singapore 550326",
+        "latitude": 1.407659,
+        "longitude": 103.812391,
+        "stars": 4.1
+    },
+    {
+        "name": "Creamier",
+        "address": "131 Lor 1 Toa Payoh, #01-02, Singapore 310131",
+        "latitude": 1.414277,
+        "longitude": 103.86563,
+        "stars": 4.7
+    },
+    {
+        "name": "Ola Acai",
+        "address": "210 Hougang St 21, #01-273, Singapore 530210",
+        "latitude": 1.38694,
+        "longitude": 103.751111,
+        "stars": 4.6
+    },
+    {
+        "name": "6Letter",
+        "address": "464 Crawford Ln, #01-464 Singapore 190464",
+        "latitude": 1.356376,
+        "longitude": 103.892016,
+        "stars": 4.7
+    },
+    {
+        "name": "Cupo Coffee",
+        "address": "103 Frankel Ave, Singapore 458225",
+        "latitude": 1.431319,
+        "longitude": 103.797577,
+        "stars": 4.3
+    },
+    {
+        "name": "The Weirdoughs",
+        "address": "211 Serangoon Ave 4, #01-10, Singapore 550211",
+        "latitude": 1.281615,
+        "longitude": 103.773758,
+        "stars": 4.4
+    },
+    {
+        "name": "Seven Scoops and Bakes",
+        "address": "Blk 345 Clementi Ave 5, #01-92, Singapore 120345",
+        "latitude": 1.399574,
+        "longitude": 103.914248,
+        "stars": 4.7
+    },
+    {
+        "name": "Cafe FuFu",
+        "address": "63B Lengkok Bahru #01-362, Singapore 152063",
+        "latitude": 1.33878,
+        "longitude": 103.905301,
+        "stars": 4.1
+    },
+    {
+        "name": "Oberstrasse",
+        "address": "809 French Rd, #01-50 Kitchener Complex, Singapore 200809",
+        "latitude": 1.411839,
+        "longitude": 103.799118,
+        "stars": 4.6
+    },
+    {
+        "name": "Quah Song & Co.",
+        "address": "2 Everton Park #01-61, Singapore 081002",
+        "latitude": 1.304506,
+        "longitude": 103.864562,
+        "stars": 4.0
+    },
+    {
+        "name": "Hello Arigato",
+        "address": "Everton Park, Singapore",
+        "latitude": 1.411426,
+        "longitude": 103.883331,
+        "stars": 4.4
+    },
+    {
+        "name": "Sweedy Patisserie",
+        "address": "377 Hougang Street, Singapore",
+        "latitude": 1.429194,
+        "longitude": 103.776725,
+        "stars": 4.9
+    },
+    {
+        "name": "Rise Bakehouse",
+        "address": "Potong Pasir, Singapore",
+        "latitude": 1.278021,
+        "longitude": 103.863089,
+        "stars": 4.4
+    },
+    {
+        "name": "Kurasu Cafe",
+        "address": "Waterloo Street, Singapore",
+        "latitude": 1.362226,
+        "longitude": 103.857796,
+        "stars": 4.5
+    },
+    {
+        "name": "Mad Roasters",
+        "address": "Depot Road, Singapore",
+        "latitude": 1.319353,
+        "longitude": 103.812518,
+        "stars": 4.1
+    },
+    {
+        "name": "Bag Me Up Bagel House",
+        "address": "Everton Park, Singapore",
+        "latitude": 1.298725,
+        "longitude": 103.8902,
+        "stars": 4.4
+    },
+    {
+        "name": "Cafe Wabi Sabi",
+        "address": "Everton Park, Singapore",
+        "latitude": 1.425884,
+        "longitude": 103.905577,
+        "stars": 4.1
+    },
+    {
+        "name": "The Better Half",
+        "address": "Everton Park, Singapore",
+        "latitude": 1.413119,
+        "longitude": 103.914149,
+        "stars": 4.2
+    },
+    {
+        "name": "Nylon Coffee Roasters",
+        "address": "Everton Park, Singapore",
+        "latitude": 1.381454,
+        "longitude": 103.873772,
+        "stars": 4.1
+    },
+    {
+        "name": "Dutch Colony Coffee Co.",
+        "address": "Tampines Hub, Singapore",
+        "latitude": 1.377203,
+        "longitude": 103.73103,
+        "stars": 4.1
+    },
+    {
+        "name": "The Cat Cafe",
+        "address": "Hillview, Singapore",
+        "latitude": 1.301208,
+        "longitude": 103.890471,
+        "stars": 4.7
+    },
+    {
+        "name": "HeySugar",
+        "address": "Choa Chu Kang, Singapore",
+        "latitude": 1.338806,
+        "longitude": 103.846624,
+        "stars": 4.2
+    },
+    {
+        "name": "Swisslink Bakery & Cafe",
+        "address": "Clementi, Singapore",
+        "latitude": 1.425393,
+        "longitude": 103.848885,
+        "stars": 4.7
+    },
+    {
+        "name": "Holy Cow Creamery",
+        "address": "Yishun, Singapore",
+        "latitude": 1.39241,
+        "longitude": 103.871281,
+        "stars": 4.1
+    },
+    {
+        "name": "No Horse Run Gelato",
+        "address": "Ang Mo Kio, Singapore",
+        "latitude": 1.321257,
+        "longitude": 103.886488,
+        "stars": 4.1
+    }
+]

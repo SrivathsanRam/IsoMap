@@ -10,9 +10,16 @@ import {
   type Place,
   type RouteSummary,
 } from "./SearchBar";
+import {
+  PresetOverlaySidebar,
+  type PresetOverlay,
+} from "./PresetOverlaySidebar";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const mapboxAccessToken =
+  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const singapore: L.LatLngExpression = [1.3521, 103.8198];
+const overlayColors = ["#f97316", "#16a34a", "#dc2626", "#7c3aed", "#0891b2", "#ca8a04"];
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -40,14 +47,20 @@ export function Map() {
   const routeMarkersRef = useRef<L.Marker[]>([]);
   const polygonRef = useRef<L.Polygon | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
+  const presetLayerRef = useRef<L.LayerGroup | null>(null);
+  const isochroneRequestRef = useRef(0);
 
   const [mode, setMode] = useState<MapToolMode>("isochrone");
   const [routeSelection, setRouteSelection] = useState<Partial<{ start: Place; end: Place }>>({});
   const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [activeRouteIndex, setActiveRouteIndex] = useState(0);
+  const [isochronePlace, setIsochronePlace] = useState<Place | null>(null);
+  const [isochroneMinutes, setIsochroneMinutes] = useState(15);
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
+  const [presets, setPresets] = useState<PresetOverlay[]>([]);
+  const [activePresetIDs, setActivePresetIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(mapboxAccessToken ? "" : "MAPBOX_ACCESS_TOKEN is not set.");
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) {
@@ -55,26 +68,86 @@ export function Map() {
     }
 
     const map = L.map(elementRef.current).setView(singapore, 12);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    if (mapboxAccessToken) {
+      L.tileLayer(
+        `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`,
+        {
+          attribution:
+            '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+          tileSize: 512,
+          zoomOffset: -1,
+        },
+      ).addTo(map);
+    }
     mapRef.current = map;
+    presetLayerRef.current = L.layerGroup().addTo(map);
 
     return () => {
       map.remove();
       mapRef.current = null;
+      presetLayerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const presetLayer = presetLayerRef.current;
+    if (!map || !presetLayer) {
+      return;
+    }
+
+    presetLayer.clearLayers();
+    const activePresets = presets.filter((preset) => activePresetIDs.includes(preset.id));
+    const bounds: L.LatLngExpression[] = [];
+
+    activePresets.forEach((preset, presetIndex) => {
+      const color = overlayColors[presetIndex % overlayColors.length];
+      preset.locations.forEach((location) => {
+        const position: L.LatLngExpression = [location.latitude, location.longitude];
+        bounds.push(position);
+        L.circleMarker(position, {
+          radius: 7,
+          color,
+          fillColor: color,
+          fillOpacity: 0.82,
+          weight: 2,
+        })
+          .bindPopup(`<strong>${escapeHTML(location.name)}</strong><br>${escapeHTML(location.address)}`)
+          .addTo(presetLayer);
+      });
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
+    }
+  }, [activePresetIDs, presets]);
 
   function changeMode(nextMode: MapToolMode) {
     setMode(nextMode);
     clearMapLayers();
     setRoutes([]);
+    setIsochronePlace(null);
     setIsochroneAreaKm2(null);
     setError("");
   }
 
   async function selectIsochronePlace(place: Place) {
+    setIsochronePlace(place);
+    await drawIsochrone(place, isochroneMinutes);
+  }
+
+  async function changeIsochroneMinutes(minutes: number) {
+    setIsochroneMinutes(minutes);
+    if (isochronePlace) {
+      await drawIsochrone(isochronePlace, minutes);
+    }
+  }
+
+  async function drawIsochrone(place: Place, minutes: number) {
+    const requestID = isochroneRequestRef.current + 1;
+    isochroneRequestRef.current = requestID;
+
     const lat = Number(place.lat);
     const lon = Number(place.lon);
     const map = mapRef.current;
@@ -92,12 +165,16 @@ export function Map() {
       const response = await fetch(`${api}/isochrone`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lat, lon }),
+        body: JSON.stringify({ lat, lon, minutes }),
       });
       if (!response.ok) {
         throw new Error("Could not load isochrone.");
       }
       const points = (await response.json()) as Point[];
+      if (requestID !== isochroneRequestRef.current) {
+        return;
+      }
+
       const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
 
       polygonRef.current = L.polygon(polygon, {
@@ -108,9 +185,13 @@ export function Map() {
       setIsochroneAreaKm2(calculatePolygonAreaKm2(points));
       map.fitBounds(polygonRef.current.getBounds());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load isochrone.");
+      if (requestID === isochroneRequestRef.current) {
+        setError(err instanceof Error ? err.message : "Could not load isochrone.");
+      }
     } finally {
-      setIsLoading(false);
+      if (requestID === isochroneRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -195,21 +276,42 @@ export function Map() {
     routeMarkersRef.current = [];
   }
 
+  function createPresetOverlay(preset: PresetOverlay) {
+    setPresets((current) => upsertPreset(current, preset));
+    setActivePresetIDs((current) => [...current.filter((presetID) => presetID !== preset.id), preset.id]);
+  }
+
+  function togglePreset(preset: PresetOverlay) {
+    setPresets((current) => upsertPreset(current, preset));
+    setActivePresetIDs((current) =>
+      current.includes(preset.id)
+        ? current.filter((activePresetID) => activePresetID !== preset.id)
+        : [...current, preset.id],
+    );
+  }
+
   return (
     <main className="screen">
       <SearchBar
         mode={mode}
         routeSelection={routeSelection}
         isochroneAreaKm2={isochroneAreaKm2}
+        isochroneMinutes={isochroneMinutes}
         routeResults={routes}
         activeRouteIndex={activeRouteIndex}
         isLoading={isLoading}
         error={error}
         onModeChange={changeMode}
         onIsochroneSelect={selectIsochronePlace}
+        onIsochroneMinutesChange={changeIsochroneMinutes}
         onRoutePlaceChange={changeRoutePlace}
         onRouteSubmit={submitRoute}
         onRouteSelect={selectRoute}
+      />
+      <PresetOverlaySidebar
+        activePresetIDs={activePresetIDs}
+        onPresetCreated={createPresetOverlay}
+        onTogglePreset={togglePreset}
       />
       <div ref={elementRef} className="map" />
     </main>
@@ -247,4 +349,18 @@ function calculatePolygonAreaKm2(points: Point[]) {
 
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
+}
+
+function escapeHTML(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function upsertPreset(presets: PresetOverlay[], preset: PresetOverlay) {
+  const withoutPreset = presets.filter((current) => current.id !== preset.id);
+  return [...withoutPreset, preset];
 }

@@ -1,0 +1,302 @@
+[
+    {
+        "name": "National Museum of Singapore",
+        "address": "93 Stamford Rd, Singapore 178897",
+        "latitude": 1.2966,
+        "longitude": 103.8485
+    },
+    {
+        "name": "Sultan Mosque",
+        "address": "3 Muscat St, Singapore 198833",
+        "latitude": 1.3023,
+        "longitude": 103.859
+    },
+    {
+        "name": "Thian Hock Keng Temple",
+        "address": "158 Telok Ayer St, Singapore 068613",
+        "latitude": 1.2809,
+        "longitude": 103.8476
+    },
+    {
+        "name": "Sri Mariamman Temple",
+        "address": "244 South Bridge Rd, Singapore 058793",
+        "latitude": 1.2827,
+        "longitude": 103.8453
+    },
+    {
+        "name": "Lau Pa Sat (Telok Ayer Market)",
+        "address": "18 Raffles Quay, Singapore 048582",
+        "latitude": 1.2807,
+        "longitude": 103.8504
+    },
+    {
+        "name": "Former City Hall & Supreme Court (National Gallery)",
+        "address": "1 St Andrew's Rd, Singapore 178957",
+        "latitude": 1.2903,
+        "longitude": 103.8516
+    },
+    {
+        "name": "Raffles Hotel",
+        "address": "1 Beach Rd, Singapore 189673",
+        "latitude": 1.2949,
+        "longitude": 103.8546
+    },
+    {
+        "name": "Old Parliament House (The Arts House)",
+        "address": "1 Old Parliament Ln, Singapore 179429",
+        "latitude": 1.2889,
+        "longitude": 103.851
+    },
+    {
+        "name": "Victoria Theatre and Concert Hall",
+        "address": "9 Empress Pl, Singapore 179556",
+        "latitude": 1.2878,
+        "longitude": 103.8514
+    },
+    {
+        "name": "Asian Civilisations Museum",
+        "address": "1 Empress Pl, Singapore 179555",
+        "latitude": 1.2871,
+        "longitude": 103.8513
+    },
+    {
+        "name": "Old Hill Street Police Station",
+        "address": "140 Hill St, Singapore 179369",
+        "latitude": 1.2908,
+        "longitude": 103.8488
+    },
+    {
+        "name": "Fort Siloso",
+        "address": "Siloso Rd, Singapore 099981",
+        "latitude": 1.2581,
+        "longitude": 103.8122
+    },
+    {
+        "name": "Battlebox (Fort Canning)",
+        "address": "2 Cox Terrace, Singapore 179622",
+        "latitude": 1.2961,
+        "longitude": 103.8465
+    },
+    {
+        "name": "Former Ford Factory",
+        "address": "351 Upper Bukit Timah Rd, Singapore 588192",
+        "latitude": 1.3536,
+        "longitude": 103.7708
+    },
+    {
+        "name": "Kranji War Memorial",
+        "address": "9 Woodlands Rd, Singapore 738656",
+        "latitude": 1.4187,
+        "longitude": 103.7583
+    },
+    {
+        "name": "Civilian War Memorial",
+        "address": "Beach Rd, Singapore 189768",
+        "latitude": 1.2933,
+        "longitude": 103.8553
+    },
+    {
+        "name": "Sun Yat Sen Nanyang Memorial Hall",
+        "address": "12 Tai Gin Rd, Singapore 327874",
+        "latitude": 1.3283,
+        "longitude": 103.8468
+    },
+    {
+        "name": "Changi Chapel and Museum",
+        "address": "1000 Upper Changi Rd N, Singapore 507707",
+        "latitude": 1.3621,
+        "longitude": 103.9735
+    },
+    {
+        "name": "Reflections at Bukit Chandu",
+        "address": "31 Pepys Rd, Singapore 118458",
+        "latitude": 1.2778,
+        "longitude": 103.7928
+    },
+    {
+        "name": "House of Tan Teng Niah",
+        "address": "37 Kerbau Rd, Singapore 219168",
+        "latitude": 1.3065,
+        "longitude": 103.851
+    },
+    {
+        "name": "Armenian Apostolic Church of St. Gregory",
+        "address": "60 Hill St, Singapore 179366",
+        "latitude": 1.2931,
+        "longitude": 103.8494
+    },
+    {
+        "name": "St Andrew's Cathedral",
+        "address": "11 St Andrew's Rd, Singapore 178959",
+        "latitude": 1.2922,
+        "longitude": 103.8523
+    },
+    {
+        "name": "Cathedral of the Good Shepherd",
+        "address": "A Queen St, Singapore 188533",
+        "latitude": 1.2961,
+        "longitude": 103.8513
+    },
+    {
+        "name": "CHIJMES (Convent of the Holy Infant Jesus)",
+        "address": "30 Victoria St, Singapore 187996",
+        "latitude": 1.2954,
+        "longitude": 103.8523
+    },
+    {
+        "name": "Central Fire Station",
+        "address": "62 Hill St, Singapore 179367",
+        "latitude": 1.292,
+        "longitude": 103.8492
+    },
+    {
+        "name": "Cavenagh Bridge",
+        "address": "1 Fullerton Rd, Singapore 049213",
+        "latitude": 1.2866,
+        "longitude": 103.8524
+    },
+    {
+        "name": "Anderson Bridge",
+        "address": "Fullerton Rd, Singapore 049213",
+        "latitude": 1.2873,
+        "longitude": 103.8531
+    },
+    {
+        "name": "Elgin Bridge",
+        "address": "North Bridge Rd / South Bridge Rd, Singapore",
+        "latitude": 1.2887,
+        "longitude": 103.8498
+    },
+    {
+        "name": "The Cenotaph",
+        "address": "Connaught Dr, Singapore 179682",
+        "latitude": 1.2902,
+        "longitude": 103.8538
+    },
+    {
+        "name": "Lim Bo Seng Memorial",
+        "address": "Esplanade Park, Connaught Dr, Singapore 179682",
+        "latitude": 1.2905,
+        "longitude": 103.8539
+    },
+    {
+        "name": "Tan Kim Seng Fountain",
+        "address": "Esplanade Park, Connaught Dr, Singapore 179682",
+        "latitude": 1.2908,
+        "longitude": 103.854
+    },
+    {
+        "name": "MacDonald House",
+        "address": "40 Orchard Rd, Singapore 238838",
+        "latitude": 1.2991,
+        "longitude": 103.8475
+    },
+    {
+        "name": "Goodwood Park Hotel (Tower Wing)",
+        "address": "22 Scotts Rd, Singapore 228221",
+        "latitude": 1.3072,
+        "longitude": 103.8336
+    },
+    {
+        "name": "Tanjong Pagar Railway Station (Former)",
+        "address": "30 Keppel Rd, Singapore 089059",
+        "latitude": 1.2736,
+        "longitude": 103.8383
+    },
+    {
+        "name": "Former St Joseph's Institution (Singapore Art Museum)",
+        "address": "71 Bras Basah Rd, Singapore 189555",
+        "latitude": 1.2974,
+        "longitude": 103.8512
+    },
+    {
+        "name": "Peranakan Museum (Former Tao Nan School)",
+        "address": "39 Armenian St, Singapore 179941",
+        "latitude": 1.2944,
+        "longitude": 103.8492
+    },
+    {
+        "name": "Lian Shan Shuang Lin Monastery",
+        "address": "184 Jalan Toa Payoh, Singapore 319944",
+        "latitude": 1.3298,
+        "longitude": 103.8562
+    },
+    {
+        "name": "Sri Srinivasa Perumal Temple",
+        "address": "397 Serangoon Rd, Singapore 218123",
+        "latitude": 1.3122,
+        "longitude": 103.8563
+    },
+    {
+        "name": "Sri Thendayuthapani Temple",
+        "address": "15 Tank Rd, Singapore 238065",
+        "latitude": 1.2971,
+        "longitude": 103.8427
+    },
+    {
+        "name": "Abdul Gafoor Mosque",
+        "address": "41 Dunlop St, Singapore 209369",
+        "latitude": 1.3039,
+        "longitude": 103.8528
+    },
+    {
+        "name": "Hajjah Fatimah Mosque",
+        "address": "400 Beach Rd, Singapore 199586",
+        "latitude": 1.3025,
+        "longitude": 103.8631
+    },
+    {
+        "name": "Jamae (Chulia) Mosque",
+        "address": "218 South Bridge Rd, Singapore 058767",
+        "latitude": 1.2833,
+        "longitude": 103.8458
+    },
+    {
+        "name": "Nagore Dargah Indian Muslim Heritage Centre",
+        "address": "140 Telok Ayer St, Singapore 068604",
+        "latitude": 1.2801,
+        "longitude": 103.8472
+    },
+    {
+        "name": "Yueh Hai Ching Temple",
+        "address": "30B Philip St, Singapore 048696",
+        "latitude": 1.2847,
+        "longitude": 103.8494
+    },
+    {
+        "name": "Hong San See Temple",
+        "address": "29 Mohamed Sultan Rd, Singapore 238973",
+        "latitude": 1.2941,
+        "longitude": 103.8398
+    },
+    {
+        "name": "Tou Mu Kung Temple",
+        "address": "893 Upper Serangoon Rd, Singapore 534701",
+        "latitude": 1.3571,
+        "longitude": 103.8824
+    },
+    {
+        "name": "Telok Ayer Chinese Methodist Church",
+        "address": "235 Telok Ayer St, Singapore 068656",
+        "latitude": 1.279,
+        "longitude": 103.8465
+    },
+    {
+        "name": "Alkaff Mansion",
+        "address": "10 Telok Blangah Green, Singapore 109178",
+        "latitude": 1.2783,
+        "longitude": 103.8118
+    },
+    {
+        "name": "Former Command House",
+        "address": "17 Kheam Hock Rd, Singapore 298791",
+        "latitude": 1.3253,
+        "longitude": 103.8219
+    },
+    {
+        "name": "Former Admiralty House",
+        "address": "345 Old Nelson Rd, Singapore 758692",
+        "latitude": 1.4526,
+        "longitude": 103.8239
+    }
+]

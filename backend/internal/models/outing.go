@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Outing struct {
-	ID            uuid.UUID      `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	ID            uuid.UUID      `json:"id" gorm:"type:uuid;primaryKey"`
 	JoinToken     string         `json:"join_token" gorm:"uniqueIndex;not null"`
 	Title         string         `json:"title" gorm:"not null"`
 	CreatedByUser *uuid.UUID     `json:"created_by_user_id" gorm:"type:uuid"`
@@ -17,7 +18,7 @@ type Outing struct {
 }
 
 type OutingMember struct {
-	ID               uuid.UUID  `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	ID               uuid.UUID  `json:"id" gorm:"type:uuid;primaryKey"`
 	OutingID         uuid.UUID  `json:"outing_id" gorm:"type:uuid;not null;index"`
 	UserID           *uuid.UUID `json:"user_id" gorm:"type:uuid;index"`
 	DisplayName      string     `json:"display_name" gorm:"not null"`
@@ -28,4 +29,18 @@ type OutingMember struct {
 	CreatedAt        time.Time  `json:"created_at"`
 	UpdatedAt        time.Time  `json:"updated_at"`
 	Outing           Outing     `json:"-" gorm:"foreignKey:OutingID"`
+}
+
+func (outing *Outing) BeforeCreate(tx *gorm.DB) error {
+	if outing.ID == uuid.Nil {
+		outing.ID = uuid.New()
+	}
+	return nil
+}
+
+func (member *OutingMember) BeforeCreate(tx *gorm.DB) error {
+	if member.ID == uuid.Nil {
+		member.ID = uuid.New()
+	}
+	return nil
 }

@@ -7,17 +7,43 @@ export function useSavedAddresses() {
   const { user, isGuest } = useAuth();
   const [saved, setSaved] = useState<SavedAddress[]>([]);
 
-  const refresh = useCallback(() => {
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadSaved() {
+      if (!user || isGuest) {
+        setSaved([]);
+        return;
+      }
+      try {
+        const addresses = await api.getSavedAddresses(user.id);
+        if (isActive) {
+          setSaved(addresses);
+        }
+      } catch {
+        if (isActive) {
+          setSaved([]);
+        }
+      }
+    }
+
+    void loadSaved();
+    return () => {
+      isActive = false;
+    };
+  }, [user, isGuest]);
+
+  const refresh = useCallback(async () => {
     if (!user || isGuest) {
       setSaved([]);
       return;
     }
-    api.getSavedAddresses(user.id)
-      .then(setSaved)
-      .catch(() => setSaved([]));
+    try {
+      setSaved(await api.getSavedAddresses(user.id));
+    } catch {
+      setSaved([]);
+    }
   }, [user, isGuest]);
-
-  useEffect(() => { refresh(); }, [refresh]);
 
   const savePlace = useCallback(async (data: AddressRequest) => {
     if (!user || isGuest) return;

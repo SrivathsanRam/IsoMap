@@ -11,6 +11,7 @@ import (
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
 	authHandlers "github.com/SrivathsanRam/IsoMap/internal/handlers/auth"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/outings"
+	"github.com/SrivathsanRam/IsoMap/internal/handlers/presets"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/routing"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
 	"github.com/go-chi/chi/v5"
@@ -48,6 +49,9 @@ func GetRoutes() func(r chi.Router) {
 		r.Get("/outings/{token}", outings.HandleGet)
 		r.Post("/outings/{token}/members", outings.HandleJoin)
 		r.Put("/outings/{token}/members/{memberID}", outings.HandleUpdateMember)
+		r.Get("/presets", presets.HandleList)
+		r.Post("/presets", presets.HandleCreate)
+		r.Post("/presets/{presetID}/vote", presets.HandleVote)
 		r.Get("/users", func(w http.ResponseWriter, req *http.Request) {
 			response, _ := users.HandleList(w, req)
 
@@ -89,8 +93,8 @@ func fetchIsochrone(body isochroneRequest) ([]point, error) {
 	if minutes < 5 {
 		minutes = 15
 	}
-	if minutes > 90 {
-		minutes = 90
+	if minutes > 60 {
+		minutes = 60
 	}
 
 	query.Set("contours_minutes", fmt.Sprintf("%d", minutes))
