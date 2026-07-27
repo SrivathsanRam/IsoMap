@@ -41,8 +41,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 	presetsQuery := db.DB.
 		Preload("Locations", func(tx *gorm.DB) *gorm.DB {
 			return tx.Order("created_at ASC")
-		}).
-		Order("created_at DESC")
+		})
 
 	if query != "" {
 		like := "%" + query + "%"
@@ -57,6 +56,15 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 			like,
 			like,
 		)
+	}
+
+	switch strings.ToLower(strings.TrimSpace(r.URL.Query().Get("sort"))) {
+	case "top":
+		presetsQuery = presetsQuery.Order("(upvotes - downvotes) DESC, upvotes DESC, created_at DESC")
+	case "trending":
+		presetsQuery = presetsQuery.Order("(upvotes + downvotes) DESC, (upvotes - downvotes) DESC, created_at DESC")
+	default:
+		presetsQuery = presetsQuery.Order("created_at DESC")
 	}
 
 	var presets []models.CommunityPreset
