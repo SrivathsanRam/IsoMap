@@ -10,7 +10,7 @@ import (
 type Address struct {
 	ID               uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
 	FormattedAddress string    `json:"formatted_address" gorm:"not null"`
-	PlaceID          string    `json:"place_id" gorm:"uniqueIndex"`
+	PlaceID          *string   `json:"place_id,omitempty" gorm:"uniqueIndex"`
 	Latitude         float64   `json:"latitude"`
 	Longitude        float64   `json:"longitude"`
 	CreatedAt        time.Time `json:"created_at"`

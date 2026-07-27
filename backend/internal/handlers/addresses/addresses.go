@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/SrivathsanRam/IsoMap/internal/api"
 	sessionauth "github.com/SrivathsanRam/IsoMap/internal/auth"
@@ -41,7 +42,7 @@ func HandleCreateRecent(w http.ResponseWriter, r *http.Request) {
 
 	address, err := addressStore.FindOrCreate(db, models.Address{
 		FormattedAddress: body.FormattedAddress,
-		PlaceID:          body.PlaceID,
+		PlaceID:          optionalString(body.PlaceID),
 		Latitude:         body.Latitude,
 		Longitude:        body.Longitude,
 	})
@@ -101,7 +102,7 @@ func HandleCreateSaved(w http.ResponseWriter, r *http.Request) {
 
 	address, err := addressStore.FindOrCreate(db, models.Address{
 		FormattedAddress: body.FormattedAddress,
-		PlaceID:          body.PlaceID,
+		PlaceID:          optionalString(body.PlaceID),
 		Latitude:         body.Latitude,
 		Longitude:        body.Longitude,
 	})
@@ -183,4 +184,12 @@ func writeError(w http.ResponseWriter, status int, message string) {
 		Messages:  []string{message},
 		ErrorCode: status,
 	})
+}
+
+func optionalString(value string) *string {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return nil
+	}
+	return &trimmed
 }
