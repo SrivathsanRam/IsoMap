@@ -1,0 +1,62 @@
+[
+    {
+        "name": "Marina Bay Sands",
+        "address": "10 Bayfront Ave, Singapore 018956",
+        "latitude": 1.2833965,
+        "longitude": 103.8607526
+    },
+    {
+        "name": "Gardens by the Bay",
+        "address": "18 Marina Gardens Dr, Singapore 018953",
+        "latitude": 1.284722,
+        "longitude": 103.865
+    },
+    {
+        "name": "Singapore Flyer",
+        "address": "30 Raffles Ave, Singapore 039803",
+        "latitude": 1.2893,
+        "longitude": 103.8631
+    },
+    {
+        "name": "Merlion Park",
+        "address": "One Fullerton, Singapore 049213",
+        "latitude": 1.2868,
+        "longitude": 103.8545
+    },
+    {
+        "name": "Jewel Changi Airport",
+        "address": "78 Airport Boulevard, Singapore 819666",
+        "latitude": 1.36074,
+        "longitude": 103.98956
+    },
+    {
+        "name": "Sri Mariamman Temple",
+        "address": "244 South Bridge Road",
+        "latitude": 1.282,
+        "longitude": 103.84538
+    },
+    {
+        "name": "Armenian Church",
+        "address": "60 Hill Street",
+        "latitude": 1.293,
+        "longitude": 103.84966
+    },
+    {
+        "name": "CHIJMES",
+        "address": "30 Victoria Street",
+        "latitude": 1.295,
+        "longitude": 103.85168
+    },
+    {
+        "name": "St Andrew's Cathedral",
+        "address": "11 St Andrew's Road",
+        "latitude": 1.292,
+        "longitude": 103.85231
+    },
+    {
+        "name": "National Gallery Singapore",
+        "address": "1 St Andrew's Rd, 01 – 01, Singapore 178957",
+        "latitude": 1.2903,
+        "longitude": 103.8516
+    }
+]
