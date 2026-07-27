@@ -118,6 +118,32 @@ button {
   width: 100%;
 }
 
+.preset-sort {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 4px;
+}
+
+.preset-sort button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 6px;
+}
+
+.preset-sort button.active {
+  background: white;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 12%);
+  color: #0f172a;
+}
+
 .preset-list {
   display: grid;
   gap: 8px;

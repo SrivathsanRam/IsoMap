@@ -187,10 +187,15 @@ export async function getIsochrone(point: Point, minutes: number) {
   return (await response.json()) as Point[];
 }
 
-export async function listCommunityPresets(query = "") {
+export type PresetSort = "new" | "top" | "trending";
+
+export async function listCommunityPresets(query = "", sort: PresetSort = "new") {
   const params = new URLSearchParams();
   if (query.trim()) {
     params.set("q", query.trim());
+  }
+  if (sort !== "new") {
+    params.set("sort", sort);
   }
   const response = await fetch(`${API_URL}/presets${params.size > 0 ? `?${params}` : ""}`);
 
