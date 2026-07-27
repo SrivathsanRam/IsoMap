@@ -142,8 +142,8 @@ func HandleUpdateMember(w http.ResponseWriter, r *http.Request) {
 	if body.MaxTravelMinutes < 5 {
 		body.MaxTravelMinutes = 5
 	}
-	if body.MaxTravelMinutes > 90 {
-		body.MaxTravelMinutes = 90
+	if body.MaxTravelMinutes > 60 {
+		body.MaxTravelMinutes = 60
 	}
 
 	db, err := database.GetDB()
