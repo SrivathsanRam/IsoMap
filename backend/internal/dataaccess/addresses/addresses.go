@@ -16,8 +16,8 @@ func FindOrCreate(db *database.Database, address models.Address) (*models.Addres
 		address.Latitude,
 		address.Longitude,
 	)
-	if address.PlaceID != "" {
-		query = db.DB.Where("place_id = ?", address.PlaceID)
+	if address.PlaceID != nil && *address.PlaceID != "" {
+		query = db.DB.Where("place_id = ?", *address.PlaceID)
 	}
 
 	err := query.First(&existing).Error
