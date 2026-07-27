@@ -7,6 +7,7 @@ import malls from "../assets/malls_singapore.json";
 import {
   createCommunityPreset,
   listCommunityPresets,
+  type PresetSort,
   voteCommunityPreset,
 } from "../lib/api";
 import { Place, PlaceInput } from "./SearchBar";
@@ -48,6 +49,7 @@ export function PresetOverlaySidebar({
   const [communityPresets, setCommunityPresets] = useState<PresetOverlay[]>([]);
   const [votes, setVotes] = useState<Record<string, "up" | "down" | undefined>>({});
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<PresetSort>("trending");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
   const [error, setError] = useState("");
@@ -79,7 +81,7 @@ export function PresetOverlaySidebar({
       setIsLoadingCommunity(true);
       setError("");
       try {
-        const presets = await listCommunityPresets(query);
+        const presets = await listCommunityPresets(query, sort);
         if (!controller.signal.aborted) {
           setCommunityPresets(presets);
         }
@@ -98,7 +100,7 @@ export function PresetOverlaySidebar({
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [query]);
+  }, [query, sort]);
 
   async function submitPreset(preset: PresetOverlay) {
     setError("");
@@ -150,6 +152,30 @@ export function PresetOverlaySidebar({
           placeholder="Search presets"
         />
 
+        <div className="preset-sort" aria-label="Community preset sort">
+          <button
+            type="button"
+            className={sort === "trending" ? "active" : ""}
+            onClick={() => setSort("trending")}
+          >
+            Trending
+          </button>
+          <button
+            type="button"
+            className={sort === "top" ? "active" : ""}
+            onClick={() => setSort("top")}
+          >
+            Top
+          </button>
+          <button
+            type="button"
+            className={sort === "new" ? "active" : ""}
+            onClick={() => setSort("new")}
+          >
+            New
+          </button>
+        </div>
+
         {error && <p className="preset-error">{error}</p>}
         {isLoadingCommunity && <p className="preset-empty">Loading community presets...</p>}
 
@@ -193,8 +219,8 @@ function PresetRow({
   onToggle: () => void;
   onVote: (direction: "up" | "down") => void;
 }) {
-  const upvotes = (preset.upvotes ?? 0) + (vote === "up" ? 1 : 0);
-  const downvotes = (preset.downvotes ?? 0) + (vote === "down" ? 1 : 0);
+  const upvotes = preset.upvotes ?? 0;
+  const downvotes = preset.downvotes ?? 0;
 
   return (
     <article className={isActive ? "preset-row active" : "preset-row"}>

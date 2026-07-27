@@ -21,5 +21,9 @@ func (database *Database) Migrate() error {
 		return errors.Wrap(err, "failed to run database migrations")
 	}
 
+	if err := database.seedCommunityPresets(); err != nil {
+		return errors.Wrap(err, "failed to seed community presets")
+	}
+
 	return nil
 }
