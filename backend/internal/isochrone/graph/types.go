@@ -34,8 +34,10 @@ type Manifest struct {
 	Format        string `json:"format"`
 	SchemaVersion int    `json:"schema_version"`
 	FeedVersion   string `json:"feed_version,omitempty"`
+	Timezone      string `json:"timezone"`
 	SourceFile    string `json:"source_file"`
 	SourceSHA256  string `json:"source_sha256"`
+	AgencyCount   int    `json:"agency_count"`
 	StopCount     int    `json:"stop_count"`
 	RouteCount    int    `json:"route_count"`
 	ServiceCount  int    `json:"service_count"`
@@ -60,6 +62,7 @@ type Artifact struct {
 // Graph uses a compressed sparse row adjacency layout. Edges originating at
 // node n are Edges[FirstOut[n]:FirstOut[n+1]].
 type Graph struct {
+	Agencies []Agency
 	Stops    []Stop
 	Routes   []Route
 	Services []Service
@@ -67,6 +70,13 @@ type Graph struct {
 	Nodes    []Node
 	FirstOut []uint32
 	Edges    []Edge
+}
+
+type Agency struct {
+	ID       string
+	Name     string
+	URL      string
+	Timezone string
 }
 
 type Stop struct {
@@ -80,6 +90,7 @@ type Stop struct {
 
 type Route struct {
 	ID        string
+	Agency    uint32
 	ShortName string
 	LongName  string
 	Type      int16
