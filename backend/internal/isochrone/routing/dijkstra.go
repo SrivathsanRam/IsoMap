@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	UnreachableSeconds     int32 = -1
-	MaxQueryTravelSeconds        = 7 * 24 * 60 * 60
-	maxServiceTimeSeconds        = 7 * 24 * 60 * 60
+	UnreachableSeconds    int32 = -1
+	MaxQueryTravelSeconds       = 7 * 24 * 60 * 60
+	maxServiceTimeSeconds       = 7 * 24 * 60 * 60
 )
 
 // StopSeed connects an origin to a graph stop. AccessSeconds is normally the
@@ -24,7 +24,7 @@ type StopSeed struct {
 }
 
 type Query struct {
-	Departure       time.Time
+	Departure        time.Time
 	MaxTravelSeconds int
 	Origins          []StopSeed
 }
@@ -38,10 +38,10 @@ type Result struct {
 }
 
 type Router struct {
-	graph            *graph.Graph
-	location         *time.Location
-	stopNodes        []uint32
-	serviceLookback  int
+	graph           *graph.Graph
+	location        *time.Location
+	stopNodes       []uint32
+	serviceLookback int
 }
 
 // New validates the graph invariants required by the query algorithm and
@@ -230,13 +230,19 @@ func (r *Router) Search(ctx context.Context, query Query) (*Result, error) {
 		end := r.graph.FirstOut[current.node+1]
 		for edgeIndex := start; edgeIndex < end; edgeIndex++ {
 			edge := r.graph.Edges[edgeIndex]
-			arrival := current.arrival + int64(edge.DurationSeconds)
+			var arrival int64
 			if edge.Kind == graph.EdgeBoard {
 				var available bool
 				arrival, available = r.nextBoarding(edge, current.arrival, deadlineUnix)
 				if !available {
 					continue
 				}
+			} else {
+				duration := int64(edge.DurationSeconds)
+				if duration > deadlineUnix-current.arrival {
+					continue
+				}
+				arrival = current.arrival + duration
 			}
 			if arrival > deadlineUnix || arrival >= distance[edge.To] {
 				continue
