@@ -8,7 +8,6 @@ import (
 
 	"github.com/SrivathsanRam/IsoMap/internal/isochrone/graph"
 	gtfsdata "github.com/SrivathsanRam/IsoMap/internal/isochrone/gtfs"
-	"github.com/SrivathsanRam/IsoMap/internal/isochrone/routing"
 	"github.com/SrivathsanRam/IsoMap/internal/isochrone/spatial"
 )
 
@@ -109,7 +108,6 @@ func TestSingaporeEngineSmoke(t *testing.T) {
 		},
 		Departure:        time.Date(2026, time.August, 13, 8, 0, 0, 0, location),
 		MaxTravelSeconds: 90 * 60,
-		OriginStops:      []routing.StopSeed{{Stop: stop}},
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)

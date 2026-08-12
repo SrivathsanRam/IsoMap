@@ -7,4 +7,8 @@ and a 1.2 distance factor on a 150-metre grid.
 
 The walking approximation is local and deterministic. A future offline OSM
 pedestrian graph can replace its cost source without changing contour output.
-Nearest-stop lookup remains to be implemented here.
+
+Origin access currently scans the feed's boarding stops, chooses up to 64 stops
+within one kilometre, and converts their distance to walking seconds. With only
+5,450 feed stops, this scan remains inexpensive and avoids another persisted
+index.

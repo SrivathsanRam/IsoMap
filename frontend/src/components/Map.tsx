@@ -14,6 +14,7 @@ import {
   PresetOverlaySidebar,
   type PresetOverlay,
 } from "./PresetOverlaySidebar";
+import { getIsochrone, type MultiPolygonGeometry } from "../lib/api";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const mapboxAccessToken =
@@ -45,7 +46,7 @@ export function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const routeMarkersRef = useRef<L.Marker[]>([]);
-  const polygonRef = useRef<L.Polygon | null>(null);
+  const polygonRef = useRef<L.GeoJSON | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
   const presetLayerRef = useRef<L.LayerGroup | null>(null);
   const isochroneRequestRef = useRef(0);
@@ -162,28 +163,24 @@ export function Map() {
     markerRef.current = L.marker([lat, lon]).addTo(map);
 
     try {
-      const response = await fetch(`${api}/isochrone`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lat, lon, minutes }),
-      });
-      if (!response.ok) {
-        throw new Error("Could not load isochrone.");
-      }
-      const points = (await response.json()) as Point[];
+      const feature = await getIsochrone({ lat, lon }, minutes);
       if (requestID !== isochroneRequestRef.current) {
         return;
       }
 
-      const polygon = points.map((point) => [point.lat, point.lon] as L.LatLngExpression);
-
-      polygonRef.current = L.polygon(polygon, {
-        color: "#2563eb",
-        fillColor: "#60a5fa",
-        fillOpacity: 0.25,
+      polygonRef.current = L.geoJSON(feature, {
+        style: {
+          color: "#2563eb",
+          fillColor: "#60a5fa",
+          fillOpacity: 0.25,
+          weight: 3,
+        },
       }).addTo(map);
-      setIsochroneAreaKm2(calculatePolygonAreaKm2(points));
-      map.fitBounds(polygonRef.current.getBounds());
+      setIsochroneAreaKm2(calculateMultiPolygonAreaKm2(feature.geometry));
+      const bounds = polygonRef.current.getBounds();
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
     } catch (err) {
       if (requestID === isochroneRequestRef.current) {
         setError(err instanceof Error ? err.message : "Could not load isochrone.");
@@ -329,19 +326,29 @@ function placeToLatLng(place: Place): L.LatLngExpression {
   return [Number(place.lat), Number(place.lon)];
 }
 
-function calculatePolygonAreaKm2(points: Point[]) {
-  if (points.length < 3) {
+function calculateMultiPolygonAreaKm2(geometry: MultiPolygonGeometry) {
+  return geometry.coordinates.reduce((total, polygon) => {
+    if (polygon.length === 0) {
+      return total;
+    }
+    const exterior = sphericalRingAreaKm2(polygon[0]);
+    const holes = polygon.slice(1).reduce((area, ring) => area + sphericalRingAreaKm2(ring), 0);
+    return total + Math.max(0, exterior - holes);
+  }, 0);
+}
+
+function sphericalRingAreaKm2(points: [number, number][]) {
+  if (points.length < 4) {
     return 0;
   }
-
   const radiusMeters = 6_371_008.8;
   let area = 0;
 
   for (let i = 0; i < points.length; i += 1) {
     const current = points[i];
     const next = points[(i + 1) % points.length];
-    area += toRadians(next.lon - current.lon) *
-      (2 + Math.sin(toRadians(current.lat)) + Math.sin(toRadians(next.lat)));
+    area += toRadians(next[0] - current[0]) *
+      (2 + Math.sin(toRadians(current[1])) + Math.sin(toRadians(next[1])));
   }
 
   return Math.abs((area * radiusMeters * radiusMeters) / 2) / 1_000_000;

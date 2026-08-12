@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
+export type { IsochroneFeature, MultiPolygonGeometry } from "../../types";
+import type { IsochroneFeature } from "../../types";
+
 export type AddressPayload = {
   formatted_address: string;
   place_id?: string;
@@ -173,18 +176,23 @@ export async function updateOutingMember(
   return (await response.json()) as OutingMember;
 }
 
-export async function getIsochrone(point: Point, minutes: number) {
+export async function getIsochrone(point: Point, minutes: number, departureTime?: string) {
   const response = await fetch(`${API_URL}/isochrone`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...point, minutes }),
+    body: JSON.stringify({
+      ...point,
+      minutes,
+      ...(departureTime ? { departure_time: departureTime } : {}),
+    }),
   });
 
   if (!response.ok) {
-    throw new Error("Failed to load isochrone");
+    const error = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(error?.message ?? "Failed to load isochrone");
   }
 
-  return (await response.json()) as Point[];
+  return (await response.json()) as IsochroneFeature;
 }
 
 export type PresetSort = "new" | "top" | "trending";

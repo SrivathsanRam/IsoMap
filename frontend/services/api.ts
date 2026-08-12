@@ -5,6 +5,7 @@ import type {
   AddressSearch,
   ApiResponse,
   Point,
+  IsochroneFeature,
   SavedAddress,
   User,
 } from "../types";
@@ -53,8 +54,8 @@ class ApiService {
     return unwrap(response);
   }
 
-  async getIsochrone(point: Point): Promise<Point[]> {
-    const response = await this.client.post<Point[]>("/isochrone", point);
+  async getIsochrone(point: Point, minutes: number): Promise<IsochroneFeature> {
+    const response = await this.client.post<IsochroneFeature>("/isochrone", { ...point, minutes });
     return response.data;
   }
 

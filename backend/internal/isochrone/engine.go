@@ -106,6 +106,18 @@ func (e *Engine) Generate(ctx context.Context, query Query) (*Result, error) {
 	if e == nil || e.router == nil || e.graph == nil {
 		return nil, fmt.Errorf("isochrone engine is not initialized")
 	}
+	if ctx == nil {
+		return nil, fmt.Errorf("context is nil")
+	}
+	if query.Departure.IsZero() {
+		return nil, fmt.Errorf("departure time is required")
+	}
+	if query.MaxTravelSeconds <= 0 || query.MaxTravelSeconds > routing.MaxQueryTravelSeconds {
+		return nil, fmt.Errorf("max travel time must be between 1 and %d seconds", routing.MaxQueryTravelSeconds)
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	originStops := query.OriginStops
 	if len(originStops) == 0 && e.access != nil {
 		var err error

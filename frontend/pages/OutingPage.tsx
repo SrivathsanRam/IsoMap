@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
-import { featureCollection, polygon } from "@turf/helpers"
+import { featureCollection, multiPolygon } from "@turf/helpers"
 import intersect from "@turf/intersect"
 
 import {
@@ -12,7 +12,7 @@ import {
   updateOutingMember,
   type Outing,
   type OutingMember,
-  type Point,
+  type MultiPolygonGeometry,
 } from "../src/lib/api"
 
 type Place = {
@@ -23,7 +23,7 @@ type Place = {
 
 type MemberPolygon = {
   memberId: string
-  points: Point[]
+  geometry: MultiPolygonGeometry
 }
 
 const singapore: L.LatLngExpression = [1.3521, 103.8198]
@@ -139,10 +139,10 @@ export default function OutingPage() {
       const nextPolygons = await Promise.all(
         members.map(async (member) => ({
           memberId: member.id,
-          points: await getIsochrone(
+          geometry: (await getIsochrone(
             { lat: Number(member.latitude), lon: Number(member.longitude) },
             member.max_travel_minutes,
-          ),
+          )).geometry,
         })),
       )
       setPolygons(nextPolygons)
@@ -164,29 +164,30 @@ export default function OutingPage() {
     const bounds = L.latLngBounds([])
 
     polygons.forEach((entry, index) => {
-      const latLngs = entry.points.map((point) => [point.lat, point.lon] as L.LatLngExpression)
-      L.polygon(latLngs, {
-        color: memberColor(index),
-        fillColor: memberColor(index),
-        fillOpacity: 0.08,
-        weight: 2,
-      }).addTo(layerGroup)
-      latLngs.forEach((point) => bounds.extend(point))
+	  const layer = L.geoJSON(entry.geometry, {
+		style: {
+		  color: memberColor(index),
+		  fillColor: memberColor(index),
+		  fillOpacity: 0.08,
+		  weight: 2,
+		},
+	  }).addTo(layerGroup)
+	  bounds.extend(layer.getBounds())
     })
 
     const overlap = intersectAll(polygons)
     if (overlap) {
-      overlapToLatLngRings(overlap).forEach((latLngs) => {
-        const overlapLayer = L.polygon(latLngs, {
-          color: "#166534",
-          fillColor: "#22c55e",
-          fillOpacity: 0.5,
-          opacity: 1,
-          weight: 4,
-        }).addTo(layerGroup)
-        overlapLayer.bringToFront()
-        latLngs.forEach((point) => bounds.extend(point))
-      })
+	  const overlapLayer = L.geoJSON(overlap, {
+		style: {
+		  color: "#166534",
+		  fillColor: "#22c55e",
+		  fillOpacity: 0.5,
+		  opacity: 1,
+		  weight: 4,
+		},
+	  }).addTo(layerGroup)
+	  overlapLayer.bringToFront()
+	  bounds.extend(overlapLayer.getBounds())
     }
 
     if (bounds.isValid()) {
@@ -364,10 +365,9 @@ function PlaceSearch({ onSelect }: { onSelect: (place: Place) => void }) {
 }
 
 function intersectAll(polygons: MemberPolygon[]) {
-  const features = polygons.flatMap((entry) => {
-    const ring = toTurfRing(entry.points)
-    return ring ? [polygon([ring])] : []
-  })
+	const features = polygons
+	  .filter((entry) => entry.geometry.coordinates.length > 0)
+	  .map((entry) => multiPolygon(entry.geometry.coordinates))
 
   if (features.length < 2) {
     return null
@@ -383,38 +383,6 @@ function intersectAll(polygons: MemberPolygon[]) {
   }
 
   return overlap
-}
-
-function toTurfRing(points: Point[]) {
-  const ring = points
-    .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon))
-    .map((point) => [point.lon, point.lat])
-
-  if (ring.length < 3) {
-    return null
-  }
-
-  const first = ring[0]
-  const last = ring[ring.length - 1]
-  if (first[0] !== last[0] || first[1] !== last[1]) {
-    ring.push([...first])
-  }
-
-  return ring.length >= 4 ? ring : null
-}
-
-function overlapToLatLngRings(overlap: NonNullable<ReturnType<typeof intersectAll>>) {
-  if (overlap.geometry.type === "Polygon") {
-    return overlap.geometry.coordinates
-      .slice(0, 1)
-      .map((ring) => ring.map(([lon, lat]) => [lat, lon] as L.LatLngExpression))
-  }
-
-  return overlap.geometry.coordinates.flatMap((polygonRings) =>
-    polygonRings
-      .slice(0, 1)
-      .map((ring) => ring.map(([lon, lat]) => [lat, lon] as L.LatLngExpression)),
-  )
 }
 
 function memberColor(index: number) {

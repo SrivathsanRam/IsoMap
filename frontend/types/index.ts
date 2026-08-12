@@ -20,7 +20,34 @@ export interface Point {
   lon: number;
 }
 
-export interface IsochroneRequest extends Point {}
+export interface IsochroneRequest extends Point {
+  minutes: number;
+  departure_time?: string;
+}
+
+export type GeoJSONPosition = [number, number];
+
+export interface MultiPolygonGeometry {
+  type: "MultiPolygon";
+  coordinates: GeoJSONPosition[][][];
+}
+
+export interface IsochroneProperties {
+  minutes: number;
+  departure_time: string;
+  feed_version?: string;
+  reached_stop_count: number;
+  settled_node_count: number;
+  grid_columns: number;
+  grid_rows: number;
+  walking_model: string;
+}
+
+export interface IsochroneFeature {
+  type: "Feature";
+  geometry: MultiPolygonGeometry;
+  properties: IsochroneProperties;
+}
 
 export interface Address {
   id: string;
