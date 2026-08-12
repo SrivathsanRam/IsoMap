@@ -27,8 +27,8 @@ func NewProjection(reference Point) Projection {
 
 func (p Projection) Project(point Point) LocalPoint {
 	return LocalPoint{
-		X: earthRadiusMeters * (degreesToRadians(point.Lon)-p.referenceLonRadians) * p.longitudeScale,
-		Y: earthRadiusMeters * (degreesToRadians(point.Lat)-p.referenceLatRadians),
+		X: earthRadiusMeters * (degreesToRadians(point.Lon) - p.referenceLonRadians) * p.longitudeScale,
+		Y: earthRadiusMeters * (degreesToRadians(point.Lat) - p.referenceLatRadians),
 	}
 }
 
