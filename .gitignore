@@ -40,3 +40,7 @@ yarn-error.log*
 
 dist/
 dist
+
+# Generated GTFS graph artifacts
+/gtfs/generated/*
+!/gtfs/generated/README.md
