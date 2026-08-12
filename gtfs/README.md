@@ -9,4 +9,20 @@ gtfs/
 `-- generated/   Build output consumed by the backend
 ```
 
-The generated directory is intentionally excluded from version control except for its README. Graph artifacts will be reproducible outputs of `backend/cmd/gtfs-build`.
+The generated directory is intentionally excluded from version control except for its README. Graph artifacts are reproducible outputs of `backend/cmd/gtfs-build`.
+
+From the `backend` directory, validate and build the current feed with:
+
+```powershell
+go run ./cmd/gtfs-build
+```
+
+To validate without producing artifacts:
+
+```powershell
+go run ./cmd/gtfs-build -validate-only
+```
+
+The raw archive is the source of truth. Production packaging should include
+`generated/singapore.graph` and can omit the raw ZIP because request handling
+only needs the generated graph.

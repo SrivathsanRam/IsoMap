@@ -1,3 +1,10 @@
 # Generated graph artifacts
 
-The GTFS build command will write the serialized transit graph and its manifest here. Generated files in this directory are ignored by Git.
+`go run ./cmd/gtfs-build` from the `backend` directory writes:
+
+- `singapore.graph`: compressed, versioned runtime graph
+- `manifest.json`: human-readable feed hash, schema, counts, and bounds
+
+Generated files are ignored by Git. Generate them during a release build and
+package `singapore.graph` with the backend. They do not belong in the React
+asset bundle.
