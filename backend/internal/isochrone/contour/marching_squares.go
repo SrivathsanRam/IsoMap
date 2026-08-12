@@ -242,6 +242,9 @@ func stitchRings(segments []segment) ([]ring, error) {
 			}
 		}
 		if len(points) >= 4 {
+			// GeoJSON requires the first and last positions to be identical, not
+			// merely equal after the stitching-key quantization.
+			points[len(points)-1] = points[0]
 			signed := signedArea(points)
 			rings = append(rings, ring{
 				points:     points,
