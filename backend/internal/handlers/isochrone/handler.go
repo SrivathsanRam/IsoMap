@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strings"
@@ -22,10 +23,10 @@ type Generator interface {
 }
 
 type Handler struct {
-	generator   Generator
-	manifest    graph.Manifest
-	location    *time.Location
-	clock       func() time.Time
+	generator Generator
+	manifest  graph.Manifest
+	location  *time.Location
+	clock     func() time.Time
 }
 
 type request struct {
@@ -36,9 +37,9 @@ type request struct {
 }
 
 type feature struct {
-	Type       string             `json:"type"`
+	Type       string               `json:"type"`
 	Geometry   contour.MultiPolygon `json:"geometry"`
-	Properties properties         `json:"properties"`
+	Properties properties           `json:"properties"`
 }
 
 type properties struct {
@@ -62,9 +63,9 @@ func New(generator Generator, manifest graph.Manifest) (*Handler, error) {
 	}
 	return &Handler{
 		generator: generator,
-		manifest: manifest,
-		location: location,
-		clock:    time.Now,
+		manifest:  manifest,
+		location:  location,
+		clock:     time.Now,
 	}, nil
 }
 
@@ -82,7 +83,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid JSON request")
 		return
 	}
-	if decoder.Decode(&struct{}{}) == nil {
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
 		writeError(w, http.StatusBadRequest, "request must contain one JSON object")
 		return
 	}

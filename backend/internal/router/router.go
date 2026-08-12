@@ -9,15 +9,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Setup() chi.Router {
+func Setup(dependencies routes.Dependencies) chi.Router {
 	r := chi.NewRouter()
 	r.Use(cors)
-	setUpRoutes(r)
+	setUpRoutes(r, dependencies)
 	return r
 }
 
-func setUpRoutes(r chi.Router) {
-	r.Group(routes.GetRoutes())
+func setUpRoutes(r chi.Router, dependencies routes.Dependencies) {
+	r.Group(routes.GetRoutes(dependencies))
 }
 
 func cors(next http.Handler) http.Handler {
