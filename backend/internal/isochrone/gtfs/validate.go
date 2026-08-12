@@ -2,6 +2,7 @@ package gtfs
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -53,6 +54,39 @@ func (v *validator) result() error {
 func (f *Feed) Validate() error {
 	v := &validator{}
 
+	agencyByID := make(map[string]Agency, len(f.Agencies))
+	feedTimezone := ""
+	if len(f.Agencies) == 0 {
+		v.add("agency.txt has no rows")
+	}
+	for _, agency := range f.Agencies {
+		where := source("agency.txt", agency.SourceLine)
+		if len(f.Agencies) > 1 && agency.ID == "" {
+			v.add("%s: agency_id is required when the feed has multiple agencies", where)
+		}
+		if previous, exists := agencyByID[agency.ID]; exists {
+			v.add("%s: duplicate agency_id %q (first seen on line %d)", where, agency.ID, previous.SourceLine)
+		} else {
+			agencyByID[agency.ID] = agency
+		}
+		if agency.Name == "" {
+			v.add("%s: agency_name is empty", where)
+		}
+		if agency.URL == "" {
+			v.add("%s: agency_url is empty", where)
+		}
+		if agency.Timezone == "" {
+			v.add("%s: agency_timezone is empty", where)
+		} else if _, err := time.LoadLocation(agency.Timezone); err != nil {
+			v.add("%s: agency_timezone %q is invalid", where, agency.Timezone)
+		}
+		if feedTimezone == "" {
+			feedTimezone = agency.Timezone
+		} else if agency.Timezone != feedTimezone {
+			v.add("%s: all agencies must use the same timezone", where)
+		}
+	}
+
 	stopByID := make(map[string]Stop, len(f.Stops))
 	if len(f.Stops) == 0 {
 		v.add("stops.txt has no rows")
@@ -69,10 +103,10 @@ func (f *Feed) Validate() error {
 		if stop.Name == "" {
 			v.add("%s: stop_name is empty", where)
 		}
-		if stop.Lat < -90 || stop.Lat > 90 {
+		if math.IsNaN(stop.Lat) || math.IsInf(stop.Lat, 0) || stop.Lat < -90 || stop.Lat > 90 {
 			v.add("%s: stop_lat %v is outside [-90, 90]", where, stop.Lat)
 		}
-		if stop.Lon < -180 || stop.Lon > 180 {
+		if math.IsNaN(stop.Lon) || math.IsInf(stop.Lon, 0) || stop.Lon < -180 || stop.Lon > 180 {
 			v.add("%s: stop_lon %v is outside [-180, 180]", where, stop.Lon)
 		}
 		if stop.LocationType < 0 || stop.LocationType > 4 {
@@ -109,6 +143,16 @@ func (f *Feed) Validate() error {
 		}
 		if route.Type < 0 {
 			v.add("%s: route_type must not be negative", where)
+		}
+		if route.Type > math.MaxInt16 {
+			v.add("%s: route_type exceeds the graph format range", where)
+		}
+		if route.AgencyID != "" {
+			if _, exists := agencyByID[route.AgencyID]; !exists {
+				v.add("%s: agency_id %q does not exist", where, route.AgencyID)
+			}
+		} else if len(f.Agencies) != 1 {
+			v.add("%s: agency_id is required when the feed does not have exactly one agency", where)
 		}
 		if route.ShortName == "" && route.LongName == "" {
 			v.add("%s: route_short_name and route_long_name cannot both be empty", where)
@@ -178,6 +222,12 @@ func (f *Feed) Validate() error {
 		if stopTime.StopSequence < 0 {
 			v.add("%s: stop_sequence must not be negative", where)
 		}
+		if stopTime.StopSequence > math.MaxInt32 {
+			v.add("%s: stop_sequence exceeds the graph format range", where)
+		}
+		if stopTime.ArrivalSeconds > math.MaxInt32 || stopTime.DepartureSeconds > math.MaxInt32 {
+			v.add("%s: stop time exceeds the graph format range", where)
+		}
 		if stopTime.DepartureSeconds < stopTime.ArrivalSeconds {
 			v.add("%s: departure_time is before arrival_time", where)
 		}
@@ -217,6 +267,9 @@ func (f *Feed) Validate() error {
 		if frequency.HeadwaySeconds <= 0 {
 			v.add("%s: headway_secs must be positive", where)
 		}
+		if frequency.StartSeconds > math.MaxInt32 || frequency.EndSeconds > math.MaxInt32 || frequency.HeadwaySeconds > math.MaxInt32 {
+			v.add("%s: frequency value exceeds the graph format range", where)
+		}
 		if frequency.ExactTimes != 0 && frequency.ExactTimes != 1 {
 			v.add("%s: exact_times must be 0 or 1", where)
 		}
@@ -246,6 +299,8 @@ func (f *Feed) Validate() error {
 		}
 		if transfer.MinTransferSeconds < 0 {
 			v.add("%s: min_transfer_time must not be negative", where)
+		} else if uint64(transfer.MinTransferSeconds) > math.MaxUint32 {
+			v.add("%s: min_transfer_time exceeds the graph format range", where)
 		}
 		if transfer.Type == 2 && transfer.MinTransferSeconds == 0 {
 			v.add("%s: transfer_type 2 requires a positive min_transfer_time", where)

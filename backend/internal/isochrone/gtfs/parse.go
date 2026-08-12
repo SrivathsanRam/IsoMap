@@ -33,6 +33,9 @@ func ParseArchive(archivePath string) (*Feed, error) {
 	if err := parseFeedInfo(files, feed); err != nil {
 		return nil, err
 	}
+	if err := parseAgencies(files, feed); err != nil {
+		return nil, err
+	}
 	if err := parseStops(files, feed); err != nil {
 		return nil, err
 	}
@@ -133,8 +136,10 @@ func readTable(
 }
 
 func parseFeedInfo(files map[string]*zip.File, feed *Feed) error {
+	rows := 0
 	return readTable(files, "feed_info.txt", false, nil, func(row record, _ int) error {
-		if feed.Info.Version != "" || feed.Info.PublisherName != "" {
+		rows++
+		if rows > 1 {
 			return fmt.Errorf("multiple feed_info rows are not supported")
 		}
 		feed.Info = FeedInfo{
@@ -143,6 +148,20 @@ func parseFeedInfo(files map[string]*zip.File, feed *Feed) error {
 			Language:      row.value("feed_lang"),
 			Version:       row.value("feed_version"),
 		}
+		return nil
+	})
+}
+
+func parseAgencies(files map[string]*zip.File, feed *Feed) error {
+	headers := []string{"agency_name", "agency_url", "agency_timezone"}
+	return readTable(files, "agency.txt", true, headers, func(row record, line int) error {
+		feed.Agencies = append(feed.Agencies, Agency{
+			ID:         row.value("agency_id"),
+			Name:       row.value("agency_name"),
+			URL:        row.value("agency_url"),
+			Timezone:   row.value("agency_timezone"),
+			SourceLine: line,
+		})
 		return nil
 	})
 }
@@ -319,11 +338,11 @@ func parseTransfers(files map[string]*zip.File, feed *Feed) error {
 			return err
 		}
 		feed.Transfers = append(feed.Transfers, Transfer{
-			FromStopID:        row.value("from_stop_id"),
-			ToStopID:          row.value("to_stop_id"),
-			Type:              transferType,
+			FromStopID:         row.value("from_stop_id"),
+			ToStopID:           row.value("to_stop_id"),
+			Type:               transferType,
 			MinTransferSeconds: minimum,
-			SourceLine:        line,
+			SourceLine:         line,
 		})
 		return nil
 	})

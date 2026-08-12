@@ -4,6 +4,7 @@ package gtfs
 // SourceLine fields are retained only to make validation errors actionable.
 type Feed struct {
 	Info        FeedInfo
+	Agencies    []Agency
 	Stops       []Stop
 	Routes      []Route
 	Services    []Service
@@ -11,6 +12,14 @@ type Feed struct {
 	StopTimes   []StopTime
 	Frequencies []Frequency
 	Transfers   []Transfer
+}
+
+type Agency struct {
+	ID         string
+	Name       string
+	URL        string
+	Timezone   string
+	SourceLine int
 }
 
 type FeedInfo struct {
@@ -31,11 +40,11 @@ type Stop struct {
 }
 
 type Route struct {
-	ID        string
-	AgencyID  string
-	ShortName string
-	LongName  string
-	Type      int
+	ID         string
+	AgencyID   string
+	ShortName  string
+	LongName   string
+	Type       int
 	SourceLine int
 }
 
@@ -74,9 +83,9 @@ type Frequency struct {
 }
 
 type Transfer struct {
-	FromStopID        string
-	ToStopID          string
-	Type              int
+	FromStopID         string
+	ToStopID           string
+	Type               int
 	MinTransferSeconds int
-	SourceLine        int
+	SourceLine         int
 }
