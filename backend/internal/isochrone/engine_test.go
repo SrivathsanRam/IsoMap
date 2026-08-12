@@ -32,7 +32,6 @@ func TestEngineGeneratesWalkingAwareMultiPolygon(t *testing.T) {
 		Origin:           spatial.Point{Lat: artifact.Graph.Stops[0].Lat, Lon: artifact.Graph.Stops[0].Lon},
 		Departure:        time.Date(2026, time.January, 5, 8, 1, 0, 0, location),
 		MaxTravelSeconds: 30 * 60,
-		OriginStops:      []routing.StopSeed{{Stop: 0}},
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -45,6 +44,34 @@ func TestEngineGeneratesWalkingAwareMultiPolygon(t *testing.T) {
 	}
 	if result.GridColumns < 2 || result.GridRows < 2 {
 		t.Fatalf("invalid grid dimensions: %dx%d", result.GridColumns, result.GridRows)
+	}
+}
+
+func TestEngineFallsBackToDirectWalkingWithoutNearbyStops(t *testing.T) {
+	artifact := engineTestArtifact(t)
+	config := DefaultConfig()
+	config.Access.MaximumDistanceMeters = 100
+	config.Walking.CellSizeMeters = 50
+	config.Walking.MaximumGridCells = 10000
+	config.Contour.MinimumRingAreaSquareMeters = 2500
+	engine, err := New(artifact, config)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	location, err := time.LoadLocation("Asia/Singapore")
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := engine.Generate(context.Background(), Query{
+		Origin:           spatial.Point{Lat: 1.2, Lon: 103.6},
+		Departure:        time.Date(2026, time.January, 5, 8, 1, 0, 0, location),
+		MaxTravelSeconds: 10 * 60,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if result.ReachedStopCount != 0 || len(result.Geometry.Coordinates) != 1 {
+		t.Fatalf("direct-walk fallback: reached=%d polygons=%d", result.ReachedStopCount, len(result.Geometry.Coordinates))
 	}
 }
 
