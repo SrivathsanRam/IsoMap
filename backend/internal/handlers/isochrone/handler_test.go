@@ -13,6 +13,8 @@ import (
 	engine "github.com/SrivathsanRam/IsoMap/internal/isochrone"
 	"github.com/SrivathsanRam/IsoMap/internal/isochrone/contour"
 	"github.com/SrivathsanRam/IsoMap/internal/isochrone/graph"
+	applicationRouter "github.com/SrivathsanRam/IsoMap/internal/router"
+	"github.com/SrivathsanRam/IsoMap/internal/routes"
 )
 
 type fakeGenerator struct {
@@ -127,13 +129,14 @@ func TestSingaporeEndpointSmoke(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New() error = %v", err)
 	}
+	application := applicationRouter.Setup(routes.Dependencies{Isochrone: handler})
 	request := httptest.NewRequest(
 		http.MethodPost,
 		"/isochrone",
 		strings.NewReader(`{"lat":1.381758,"lon":103.844801,"minutes":45,"departure_time":"2026-08-13T08:00:00+08:00"}`),
 	)
 	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, request)
+	application.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d, body = %s", response.Code, response.Body.String())
 	}

@@ -55,9 +55,10 @@ type SurfaceBuilder interface {
 	) (*spatial.Grid, error)
 }
 
-// Engine composes transit routing, walking egress, travel-time rasterization,
-// and marching squares. OriginStops are deliberately supplied by the caller
-// until the separate nearest-stop access index is implemented.
+// Engine composes origin walking access, transit routing, walking egress,
+// travel-time rasterization, and marching squares. Callers can provide
+// OriginStops explicitly for advanced use; otherwise nearby stops are seeded
+// automatically from the query origin.
 type Engine struct {
 	graph   *graph.Graph
 	router  *routing.Router
