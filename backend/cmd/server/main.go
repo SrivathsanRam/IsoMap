@@ -20,14 +20,17 @@ import (
 func main() {
 	loadEnv()
 
+	log.Println("Connecting to database...")
 	db, err := database.GetDB()
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Database connection ready; running migrations...")
 
 	if err := db.Migrate(); err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Database migrations complete; loading isochrone graph...")
 
 	artifact, source, err := loadIsochroneArtifact()
 	if err != nil {
@@ -127,7 +130,7 @@ func loadEnv() {
 		env = os.Getenv("GO_ENV")
 	}
 	if env == "" {
-		env = "development"
+		env = "production"
 	}
 
 	paths := []string{

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"os"
 	"sync"
 	"time"
@@ -9,6 +10,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+const databaseConnectionTimeout = 10 * time.Second
 
 type Database struct {
 	DB *gorm.DB
@@ -33,7 +36,9 @@ func GetDB() (*Database, error) {
 		return cachedDB, nil
 	}
 
-	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
+	// GORM otherwise performs an automatic ping without a deadline. A blocked
+	// PostgreSQL/TLS handshake would then make server startup appear frozen.
+	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{DisableAutomaticPing: true})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to database")
 	}
@@ -47,7 +52,10 @@ func GetDB() (*Database, error) {
 	sqlDB.SetMaxOpenConns(20)
 	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 
-	if err := sqlDB.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), databaseConnectionTimeout)
+	defer cancel()
+	if err := sqlDB.PingContext(ctx); err != nil {
+		_ = sqlDB.Close()
 		return nil, errors.Wrap(err, "failed to ping database")
 	}
 
