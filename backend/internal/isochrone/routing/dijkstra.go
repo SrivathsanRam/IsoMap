@@ -35,6 +35,7 @@ type Result struct {
 	StopTravelSeconds []int32
 	ReachedStopCount  int
 	SettledNodeCount  int
+	TransitUsed       bool
 }
 
 type Router struct {
@@ -246,6 +247,9 @@ func (r *Router) Search(ctx context.Context, query Query) (*Result, error) {
 			}
 			if arrival > deadlineUnix || arrival >= distance[edge.To] {
 				continue
+			}
+			if edge.Kind == graph.EdgeBoard {
+				result.TransitUsed = true
 			}
 			distance[edge.To] = arrival
 			heap.Push(&queue, queueItem{node: edge.To, arrival: arrival})

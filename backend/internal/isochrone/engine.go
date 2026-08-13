@@ -38,6 +38,8 @@ type Result struct {
 	Geometry         contour.MultiPolygon
 	ReachedStopCount int
 	SettledNodeCount int
+	TransitUsed      bool
+	WalkingModel     string
 	GridColumns      int
 	GridRows         int
 }
@@ -65,10 +67,11 @@ type Engine struct {
 	surface SurfaceBuilder
 	access  OriginAccessProvider
 	contour contour.Config
+	model   string
 }
 
 type OriginAccessProvider interface {
-	Seeds(origin spatial.Point, maxTravelSeconds int) ([]routing.StopSeed, error)
+	Seeds(ctx context.Context, origin spatial.Point, maxTravelSeconds int) ([]routing.StopSeed, error)
 }
 
 func New(artifact *graph.Artifact, config Config) (*Engine, error) {
@@ -80,11 +83,31 @@ func New(artifact *graph.Artifact, config Config) (*Engine, error) {
 		access:  config.Access,
 		walking: config.Walking,
 	}
-	return newEngine(artifact, radialWalkingSurface{config: config.Walking}, access, config.Contour)
+	return newEngine(artifact, radialWalkingSurface{config: config.Walking}, access, config.Contour, "radial-distance-factor")
 }
 
 func NewWithSurface(artifact *graph.Artifact, surface SurfaceBuilder, contourConfig contour.Config) (*Engine, error) {
-	return newEngine(artifact, surface, nil, contourConfig)
+	return newEngine(artifact, surface, nil, contourConfig, "custom")
+}
+
+// NewWithWalkingProviders installs a walking implementation for both
+// origin-to-stop access and the post-transit travel-time surface. Keeping both
+// stages on the same cost model avoids mixing crow-flight access with
+// network-constrained egress.
+func NewWithWalkingProviders(
+	artifact *graph.Artifact,
+	surface SurfaceBuilder,
+	access OriginAccessProvider,
+	contourConfig contour.Config,
+	walkingModel string,
+) (*Engine, error) {
+	if access == nil {
+		return nil, fmt.Errorf("origin access provider is nil")
+	}
+	if walkingModel == "" {
+		return nil, fmt.Errorf("walking model name is empty")
+	}
+	return newEngine(artifact, surface, access, contourConfig, walkingModel)
 }
 
 func newEngine(
@@ -92,6 +115,7 @@ func newEngine(
 	surface SurfaceBuilder,
 	access OriginAccessProvider,
 	contourConfig contour.Config,
+	walkingModel string,
 ) (*Engine, error) {
 	if surface == nil {
 		return nil, fmt.Errorf("walking surface builder is nil")
@@ -100,7 +124,14 @@ func newEngine(
 	if err != nil {
 		return nil, err
 	}
-	return &Engine{graph: &artifact.Graph, router: router, surface: surface, access: access, contour: contourConfig}, nil
+	return &Engine{
+		graph:   &artifact.Graph,
+		router:  router,
+		surface: surface,
+		access:  access,
+		contour: contourConfig,
+		model:   walkingModel,
+	}, nil
 }
 
 func (e *Engine) Generate(ctx context.Context, query Query) (*Result, error) {
@@ -122,7 +153,7 @@ func (e *Engine) Generate(ctx context.Context, query Query) (*Result, error) {
 	originStops := query.OriginStops
 	if len(originStops) == 0 && e.access != nil {
 		var err error
-		originStops, err = e.access.Seeds(query.Origin, query.MaxTravelSeconds)
+		originStops, err = e.access.Seeds(ctx, query.Origin, query.MaxTravelSeconds)
 		if err != nil {
 			return nil, fmt.Errorf("find transit access stops: %w", err)
 		}
@@ -157,6 +188,8 @@ func (e *Engine) Generate(ctx context.Context, query Query) (*Result, error) {
 		Geometry:         geometry,
 		ReachedStopCount: routingResult.ReachedStopCount,
 		SettledNodeCount: routingResult.SettledNodeCount,
+		TransitUsed:      routingResult.TransitUsed,
+		WalkingModel:     e.model,
 		GridColumns:      grid.Columns,
 		GridRows:         grid.Rows,
 	}, nil
@@ -190,7 +223,7 @@ type radialOriginAccess struct {
 	walking spatial.WalkingConfig
 }
 
-func (a radialOriginAccess) Seeds(origin spatial.Point, maxTravelSeconds int) ([]routing.StopSeed, error) {
+func (a radialOriginAccess) Seeds(_ context.Context, origin spatial.Point, maxTravelSeconds int) ([]routing.StopSeed, error) {
 	candidates, err := a.index.Nearby(origin, a.access)
 	if err != nil {
 		return nil, err

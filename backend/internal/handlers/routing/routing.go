@@ -1,16 +1,18 @@
 package routing
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/SrivathsanRam/IsoMap/internal/onemap"
 )
 
 var oneMapClient = http.Client{Timeout: 15 * time.Second}
@@ -116,30 +118,12 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 	}
 
 	endpoint := "https://www.onemap.gov.sg/api/public/routingsvc/route?" + query.Encode()
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, endpoint, nil)
+	data, err := fetchOneMapRoute(r.Context(), endpoint)
 	if err != nil {
-		return nil, err
-	}
-	if token := os.Getenv("ONEMAP_API_KEY"); token != "" {
-		req.Header.Set("Authorization", token)
-	}
-
-	resp, err := oneMapClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("OneMap routing request failed")
-	}
-
-	var data oneMapRouteResponse
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 	if data.Error != "" {
-		return nil, errors.New(data.Error)
+		return nil, errors.New("OneMap routing request failed")
 	}
 	if len(data.Plan.Itineraries) == 0 {
 		return nil, fmt.Errorf("OneMap returned no routes")
@@ -183,6 +167,60 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 	}
 
 	return routes, nil
+}
+
+func fetchOneMapRoute(ctx context.Context, endpoint string) (oneMapRouteResponse, error) {
+	tokens := onemap.DefaultTokenSource()
+	for attempt := 0; attempt < 2; attempt++ {
+		token, err := tokens.Token(ctx)
+		if err != nil {
+			return oneMapRouteResponse{}, fmt.Errorf("OneMap routing authentication is unavailable")
+		}
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			return oneMapRouteResponse{}, err
+		}
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Authorization", token)
+
+		resp, err := oneMapClient.Do(req)
+		if err != nil {
+			return oneMapRouteResponse{}, err
+		}
+		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+			_ = resp.Body.Close()
+			tokens.Invalidate(token)
+			if attempt == 0 {
+				continue
+			}
+			return oneMapRouteResponse{}, fmt.Errorf("OneMap routing authentication is unavailable")
+		}
+		if resp.StatusCode != http.StatusOK {
+			_ = resp.Body.Close()
+			return oneMapRouteResponse{}, fmt.Errorf("OneMap routing request failed")
+		}
+
+		var data oneMapRouteResponse
+		decodeErr := json.NewDecoder(resp.Body).Decode(&data)
+		_ = resp.Body.Close()
+		if decodeErr != nil {
+			return oneMapRouteResponse{}, decodeErr
+		}
+		if data.Error != "" && isOneMapAuthenticationMessage(data.Error) {
+			tokens.Invalidate(token)
+			if attempt == 0 {
+				continue
+			}
+		}
+		return data, nil
+	}
+	return oneMapRouteResponse{}, fmt.Errorf("OneMap routing authentication is unavailable")
+}
+
+func isOneMapAuthenticationMessage(message string) bool {
+	message = strings.ToLower(strings.TrimSpace(message))
+	return strings.Contains(message, "token") || strings.Contains(message, "auth")
 }
 
 func validPoint(p point) bool {

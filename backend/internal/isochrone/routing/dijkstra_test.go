@@ -71,6 +71,9 @@ func TestSearchUsesExpectedHalfHeadwayWait(t *testing.T) {
 	if got, want := result.StopTravelSeconds[2], int32(25*60); got != want {
 		t.Fatalf("third stop travel time = %d, want %d", got, want)
 	}
+	if !result.TransitUsed {
+		t.Fatal("TransitUsed = false after traversing a boarding edge")
+	}
 }
 
 func TestSearchShiftsFrequencyWindowAtDownstreamStop(t *testing.T) {
@@ -125,6 +128,9 @@ func TestSearchHonorsServiceCalendar(t *testing.T) {
 	}
 	if got := result.StopTravelSeconds[1]; got != UnreachableSeconds {
 		t.Fatalf("inactive-service destination = %d, want unreachable", got)
+	}
+	if result.TransitUsed {
+		t.Fatal("TransitUsed = true with no active service")
 	}
 }
 

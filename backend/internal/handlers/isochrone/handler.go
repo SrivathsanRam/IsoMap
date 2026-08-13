@@ -16,7 +16,10 @@ import (
 	"github.com/SrivathsanRam/IsoMap/internal/isochrone/spatial"
 )
 
-const maximumRequestBytes = 1 << 20
+const (
+	maximumRequestBytes  = 1 << 20
+	defaultDepartureHour = 8
+)
 
 type Generator interface {
 	Generate(ctx context.Context, query engine.Query) (*engine.Result, error)
@@ -48,6 +51,7 @@ type properties struct {
 	FeedVersion      string `json:"feed_version,omitempty"`
 	ReachedStopCount int    `json:"reached_stop_count"`
 	SettledNodeCount int    `json:"settled_node_count"`
+	TransitUsed      bool   `json:"transit_used"`
 	GridColumns      int    `json:"grid_columns"`
 	GridRows         int    `json:"grid_rows"`
 	WalkingModel     string `json:"walking_model"`
@@ -114,6 +118,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "could not generate isochrone")
 		return
 	}
+	walkingModel := result.WalkingModel
+	if walkingModel == "" {
+		walkingModel = "unknown"
+	}
 
 	response := feature{
 		Type:     "Feature",
@@ -124,9 +132,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			FeedVersion:      h.manifest.FeedVersion,
 			ReachedStopCount: result.ReachedStopCount,
 			SettledNodeCount: result.SettledNodeCount,
+			TransitUsed:      result.TransitUsed,
 			GridColumns:      result.GridColumns,
 			GridRows:         result.GridRows,
-			WalkingModel:     "radial-distance-factor",
+			WalkingModel:     walkingModel,
 		},
 	}
 	w.Header().Set("Content-Type", "application/geo+json")
@@ -138,7 +147,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) departureTime(value string) (time.Time, error) {
 	if strings.TrimSpace(value) == "" {
-		return h.clock().In(h.location), nil
+		now := h.clock().In(h.location)
+		return time.Date(
+			now.Year(),
+			now.Month(),
+			now.Day(),
+			defaultDepartureHour,
+			0,
+			0,
+			0,
+			h.location,
+		), nil
 	}
 	parsed, err := time.Parse(time.RFC3339, value)
 	if err != nil {

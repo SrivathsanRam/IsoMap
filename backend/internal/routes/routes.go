@@ -7,6 +7,7 @@ import (
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/addresses"
 	authHandlers "github.com/SrivathsanRam/IsoMap/internal/handlers/auth"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/outings"
+	placesHandler "github.com/SrivathsanRam/IsoMap/internal/handlers/places"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/presets"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/routing"
 	"github.com/SrivathsanRam/IsoMap/internal/handlers/users"
@@ -15,15 +16,22 @@ import (
 
 type Dependencies struct {
 	Isochrone http.Handler
+	Places    http.Handler
 }
 
 func GetRoutes(dependencies Dependencies) func(r chi.Router) {
 	return func(r chi.Router) {
+		placesHTTP := dependencies.Places
+		if placesHTTP == nil {
+			placesHTTP = http.HandlerFunc(placesHandler.HandleSearch)
+		}
+
 		r.Post("/auth/google", authHandlers.HandleGoogleLogin)
 		r.Get("/auth/me", authHandlers.HandleMe)
 		r.Post("/auth/logout", authHandlers.HandleLogout)
 		r.Method(http.MethodPost, "/isochrone", dependencies.Isochrone)
 		r.Post("/routing/directions", routing.HandleDirections)
+		r.Method(http.MethodGet, "/places/search", placesHTTP)
 		r.Post("/outings", outings.HandleCreate)
 		r.Get("/outings/{token}", outings.HandleGet)
 		r.Post("/outings/{token}/members", outings.HandleJoin)
