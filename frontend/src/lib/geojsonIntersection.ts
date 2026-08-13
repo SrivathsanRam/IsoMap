@@ -1,7 +1,7 @@
 import { featureCollection, multiPolygon } from "@turf/helpers";
 import intersect from "@turf/intersect";
 import type { GeoJSONPosition, MultiPolygonGeometry } from "../../types";
-import { normalizeMultiPolygon } from "./geojson";
+import { normalizeMultiPolygon } from "./geojson.ts";
 
 export function intersectMultiPolygons(
   geometries: MultiPolygonGeometry[],
