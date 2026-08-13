@@ -1,362 +1,470 @@
 [
     {
         "name": "AMK Hub",
-        "address": "53 Ang Mo Kio Avenue 3 Singapore 569933",
-        "latitude": 1.295065,
-        "longitude": 103.837023
+        "address": "53 Ang Mo Kio Avenue 3, Singapore 569933",
+        "latitude": 1.3693,
+        "longitude": 103.8485
     },
     {
         "name": "Bedok Mall",
-        "address": "311 New Upper Changi Road Singapore 467360",
-        "latitude": 1.329773,
-        "longitude": 103.8554
+        "address": "311 New Upper Changi Road, Singapore 467360",
+        "latitude": 1.3247,
+        "longitude": 103.9292
     },
     {
         "name": "Junction 8",
-        "address": "9 Bishan Place Singapore 579837",
-        "latitude": 1.288647,
-        "longitude": 103.898728
+        "address": "9 Bishan Place, Singapore 579837",
+        "latitude": 1.3508,
+        "longitude": 103.8485
     },
     {
         "name": "Hillion Mall",
-        "address": "17 Petir Road Singapore 678278",
-        "latitude": 1.401251,
-        "longitude": 103.787679
+        "address": "17 Petir Road, Singapore 678278",
+        "latitude": 1.378,
+        "longitude": 103.7622
     },
     {
         "name": "The Star Vista",
-        "address": "1 Vista Exchange Green Singapore 138617",
-        "latitude": 1.361409,
-        "longitude": 103.873607
+        "address": "1 Vista Exchange Green, Singapore 138617",
+        "latitude": 1.3069,
+        "longitude": 103.7884
     },
     {
         "name": "Jewel Changi Airport",
-        "address": "78 Airport Boulevard Singapore 819666",
-        "latitude": 1.356236,
-        "longitude": 103.755973
+        "address": "78 Airport Boulevard, Singapore 819666",
+        "latitude": 1.3602,
+        "longitude": 103.9898
     },
     {
         "name": "Bugis+",
-        "address": "201 Victoria Street Singapore 188067",
-        "latitude": 1.408394,
-        "longitude": 103.786232
+        "address": "201 Victoria Street, Singapore 188067",
+        "latitude": 1.2996,
+        "longitude": 103.8545
     },
     {
-        "name": "Suntec City Mall",
-        "address": "3 Temasek Boulevard Singapore 038983",
-        "latitude": 1.331745,
-        "longitude": 103.737304
+        "name": "Suntec City",
+        "address": "3 Temasek Boulevard, Singapore 038983",
+        "latitude": 1.2936,
+        "longitude": 103.8578
     },
     {
         "name": "Millenia Walk",
-        "address": "9 Raffles Boulevard Singapore 039596",
-        "latitude": 1.401191,
-        "longitude": 103.764623
+        "address": "9 Raffles Boulevard, Singapore 039596",
+        "latitude": 1.2929,
+        "longitude": 103.8597
     },
     {
         "name": "Raffles City Shopping Centre",
-        "address": "252 North Bridge Rd SG 179103",
-        "latitude": 1.421458,
-        "longitude": 103.773053
+        "address": "252 North Bridge Road, Singapore 179103",
+        "latitude": 1.293,
+        "longitude": 103.852
     },
     {
-        "name": "Bugis Junction Mall",
-        "address": "200 Victoria Street Singapore 188021",
-        "latitude": 1.353137,
-        "longitude": 103.917353
+        "name": "Bugis Junction",
+        "address": "200 Victoria Street, Singapore 188021",
+        "latitude": 1.2991,
+        "longitude": 103.8553
     },
     {
-        "name": "Funan Mall",
-        "address": "107 North Bridge Road Singapore 179105",
-        "latitude": 1.308061,
-        "longitude": 103.752496
+        "name": "Funan",
+        "address": "107 North Bridge Road, Singapore 179105",
+        "latitude": 1.2913,
+        "longitude": 103.8499
     },
     {
-        "name": "Marina Square Mall",
-        "address": "6 Raffles Boulevard Singapore 039594",
-        "latitude": 1.36477,
-        "longitude": 103.88688
+        "name": "Marina Square",
+        "address": "6 Raffles Boulevard, Singapore 039594",
+        "latitude": 1.2919,
+        "longitude": 103.857
     },
     {
         "name": "Clarke Quay Central",
-        "address": "6 Eu Tong Sen Street Singapore 059817",
-        "latitude": 1.406361,
-        "longitude": 103.775381
+        "address": "6 Eu Tong Sen Street, Singapore 059817",
+        "latitude": 1.2895,
+        "longitude": 103.8466
     },
     {
         "name": "West Coast Plaza",
-        "address": "154 West Coast Road Singapore 127371",
-        "latitude": 1.325037,
-        "longitude": 103.753935
+        "address": "154 West Coast Road, Singapore 127371",
+        "latitude": 1.3036,
+        "longitude": 103.765
     },
     {
         "name": "The Clementi Mall",
-        "address": "3155 Commonwealth Avenue West SG 129588",
-        "latitude": 1.365149,
-        "longitude": 103.758603
+        "address": "3155 Commonwealth Avenue West, Singapore 129588",
+        "latitude": 1.3152,
+        "longitude": 103.7649
     },
     {
         "name": "City Square Mall",
-        "address": "180 Kitchener Road Singapore 208539",
-        "latitude": 1.289827,
-        "longitude": 103.807589
+        "address": "180 Kitchener Road, Singapore 208539",
+        "latitude": 1.3116,
+        "longitude": 103.8567
     },
     {
         "name": "HarbourFront Centre",
-        "address": "1 Maritime Square Singapore 099253",
-        "latitude": 1.419599,
-        "longitude": 103.860431
+        "address": "1 Maritime Square, Singapore 099253",
+        "latitude": 1.2647,
+        "longitude": 103.8202
     },
     {
         "name": "VivoCity",
-        "address": "1 HarbourFront Walk Singapore 098585",
-        "latitude": 1.31971,
-        "longitude": 103.831346
+        "address": "1 HarbourFront Walk, Singapore 098585",
+        "latitude": 1.2644,
+        "longitude": 103.8222
     },
     {
-        "name": "Kovan Heartland Mall",
-        "address": "205 Hougang Street 21 Singapore 530205",
-        "latitude": 1.398538,
-        "longitude": 103.818019
+        "name": "Heartland Mall Kovan",
+        "address": "205 Hougang Street 21, Singapore 530205",
+        "latitude": 1.3599,
+        "longitude": 103.885
     },
     {
         "name": "Hougang Mall",
-        "address": "90 Hougang Avenue 10 Singapore 538766",
-        "latitude": 1.351852,
-        "longitude": 103.732394
+        "address": "90 Hougang Avenue 10, Singapore 538766",
+        "latitude": 1.3724,
+        "longitude": 103.8938
     },
     {
         "name": "Jurong Point",
-        "address": "1 Jurong West Central 2 Singapore 648886",
-        "latitude": 1.377667,
-        "longitude": 103.913982
+        "address": "1 Jurong West Central 2, Singapore 648886",
+        "latitude": 1.3397,
+        "longitude": 103.7068
     },
     {
-        "name": "Westgate Mall",
-        "address": "3 Gateway Drive Singapore 608532",
-        "latitude": 1.297319,
-        "longitude": 103.772355
+        "name": "Westgate",
+        "address": "3 Gateway Drive, Singapore 608532",
+        "latitude": 1.3348,
+        "longitude": 103.7424
     },
     {
-        "name": "Jem Mall",
-        "address": "50 Jurong Gateway Road Singapore 608549",
-        "latitude": 1.404478,
-        "longitude": 103.862679
+        "name": "Jem",
+        "address": "50 Jurong Gateway Road, Singapore 608549",
+        "latitude": 1.3334,
+        "longitude": 103.7432
     },
     {
-        "name": "IMM Mall",
-        "address": "2 Jurong East Street 21 Singapore 609601",
-        "latitude": 1.426931,
-        "longitude": 103.90029
+        "name": "IMM",
+        "address": "2 Jurong East Street 21, Singapore 609601",
+        "latitude": 1.3349,
+        "longitude": 103.7467
     },
     {
         "name": "Aperia Mall",
-        "address": "12 Kallang Avenue Singapore 339511",
-        "latitude": 1.28719,
-        "longitude": 103.75925
+        "address": "12 Kallang Avenue, Singapore 339511",
+        "latitude": 1.3108,
+        "longitude": 103.8642
     },
     {
         "name": "Kallang Wave Mall",
-        "address": "1 Stadium Place Singapore 397628",
-        "latitude": 1.328047,
-        "longitude": 103.826694
+        "address": "1 Stadium Place, Singapore 397628",
+        "latitude": 1.303,
+        "longitude": 103.8736
     },
     {
         "name": "Katong Shopping Centre",
-        "address": "865 Mountbatten Road Singapore 437844",
-        "latitude": 1.306254,
-        "longitude": 103.766699
+        "address": "865 Mountbatten Road, Singapore 437844",
+        "latitude": 1.3033,
+        "longitude": 103.8955
     },
     {
-        "name": "i12 Katong Mall",
-        "address": "112 East Coast Road Singapore 428802",
-        "latitude": 1.287806,
-        "longitude": 103.826025
+        "name": "i12 Katong",
+        "address": "112 East Coast Road, Singapore 428802",
+        "latitude": 1.3055,
+        "longitude": 103.905
     },
     {
-        "name": "Parkway Parade Mall",
-        "address": "80 Marine Parade Road Singapore 449269",
-        "latitude": 1.428688,
-        "longitude": 103.810825
+        "name": "Parkway Parade",
+        "address": "80 Marine Parade Road, Singapore 449269",
+        "latitude": 1.3012,
+        "longitude": 103.905
     },
     {
-        "name": "Great World City",
-        "address": "1 Kim Seng Promenade Singapore 237994",
-        "latitude": 1.415562,
-        "longitude": 103.86615
+        "name": "Great World",
+        "address": "1 Kim Seng Promenade, Singapore 237994",
+        "latitude": 1.2938,
+        "longitude": 103.8319
     },
     {
-        "name": "United Square Shopping Mall",
-        "address": "101 Thomson Road Singapore 307591",
-        "latitude": 1.382798,
-        "longitude": 103.83261
+        "name": "United Square",
+        "address": "101 Thomson Road, Singapore 307591",
+        "latitude": 1.3178,
+        "longitude": 103.8437
     },
     {
         "name": "Zhongshan Mall",
-        "address": "20 Ah Hood Road Singapore 329984",
-        "latitude": 1.397304,
-        "longitude": 103.744207
+        "address": "20 Ah Hood Road, Singapore 329984",
+        "latitude": 1.3274,
+        "longitude": 103.8465
     },
     {
-        "name": "Paragon Shopping Centre",
-        "address": "290 Orchard Road Singapore 238859",
-        "latitude": 1.344094,
-        "longitude": 103.725886
+        "name": "Paragon",
+        "address": "290 Orchard Road, Singapore 238859",
+        "latitude": 1.3039,
+        "longitude": 103.8358
     },
     {
         "name": "Palais Renaissance",
-        "address": "390 Orchard Road Singapore 238871",
-        "latitude": 1.391378,
-        "longitude": 103.835223
+        "address": "390 Orchard Road, Singapore 238871",
+        "latitude": 1.3064,
+        "longitude": 103.8297
     },
     {
         "name": "The Centrepoint",
-        "address": "176 Orchard Road Singapore 238843",
-        "latitude": 1.410795,
-        "longitude": 103.841334
+        "address": "176 Orchard Road, Singapore 238843",
+        "latitude": 1.3015,
+        "longitude": 103.8398
     },
     {
         "name": "Wisma Atria",
-        "address": "435 Orchard Road Singapore 238877",
-        "latitude": 1.367099,
-        "longitude": 103.796134
+        "address": "435 Orchard Road, Singapore 238877",
+        "latitude": 1.3037,
+        "longitude": 103.833
+    },
+    {
+        "name": "ION Orchard",
+        "address": "2 Orchard Turn, Singapore 238801",
+        "latitude": 1.304,
+        "longitude": 103.8319
+    },
+    {
+        "name": "Ngee Ann City",
+        "address": "391 Orchard Road, Singapore 238873",
+        "latitude": 1.3024,
+        "longitude": 103.8345
+    },
+    {
+        "name": "313@somerset",
+        "address": "313 Orchard Road, Singapore 238895",
+        "latitude": 1.301,
+        "longitude": 103.8384
+    },
+    {
+        "name": "Plaza Singapura",
+        "address": "68 Orchard Road, Singapore 238839",
+        "latitude": 1.3006,
+        "longitude": 103.8452
+    },
+    {
+        "name": "Orchard Central",
+        "address": "181 Orchard Road, Singapore 238896",
+        "latitude": 1.3007,
+        "longitude": 103.8397
+    },
+    {
+        "name": "Mandarin Gallery",
+        "address": "333A Orchard Road, Singapore 238897",
+        "latitude": 1.3021,
+        "longitude": 103.8363
+    },
+    {
+        "name": "Far East Plaza",
+        "address": "14 Scotts Road, Singapore 228213",
+        "latitude": 1.3071,
+        "longitude": 103.8333
     },
     {
         "name": "Elias Mall",
-        "address": "625 Elias Road Singapore 510625",
-        "latitude": 1.411089,
-        "longitude": 103.832846
+        "address": "625 Elias Road, Singapore 510625",
+        "latitude": 1.3792,
+        "longitude": 103.9422
     },
     {
-        "name": "NTUC Downtown East",
-        "address": "1 Pasir Ris Close Singapore 519599",
-        "latitude": 1.32681,
-        "longitude": 103.723127
+        "name": "Downtown East",
+        "address": "1 Pasir Ris Close, Singapore 519599",
+        "latitude": 1.377,
+        "longitude": 103.955
     },
     {
-        "name": "White Sands Mall",
-        "address": "1 Pasir Ris Central St 3 Singapore 518457",
-        "latitude": 1.431101,
-        "longitude": 103.747428
+        "name": "White Sands",
+        "address": "1 Pasir Ris Central Street 3, Singapore 518457",
+        "latitude": 1.3724,
+        "longitude": 103.9495
     },
     {
         "name": "Loyang Point",
-        "address": "259 Pasir Ris Street 21 Singapore 510259",
-        "latitude": 1.317778,
-        "longitude": 103.758689
+        "address": "259 Pasir Ris Street 21, Singapore 510259",
+        "latitude": 1.3678,
+        "longitude": 103.9647
     },
     {
-        "name": "Kinex Mall",
-        "address": "11 Tanjong Katong Road Singapore 437157",
-        "latitude": 1.30053,
-        "longitude": 103.781917
+        "name": "KINEX",
+        "address": "11 Tanjong Katong Road, Singapore 437157",
+        "latitude": 1.3148,
+        "longitude": 103.894
     },
     {
         "name": "PLQ Mall",
-        "address": "10 Paya Lebar Road Singapore 409057",
-        "latitude": 1.344768,
-        "longitude": 103.801185
+        "address": "10 Paya Lebar Road, Singapore 409057",
+        "latitude": 1.3174,
+        "longitude": 103.8927
+    },
+    {
+        "name": "SingPost Centre",
+        "address": "10 Eunos Road 8, Singapore 408600",
+        "latitude": 1.318,
+        "longitude": 103.893
     },
     {
         "name": "Waterway Point",
-        "address": "83 Punggol Central Singapore 828761",
-        "latitude": 1.379805,
-        "longitude": 103.729918
+        "address": "83 Punggol Central, Singapore 828761",
+        "latitude": 1.4067,
+        "longitude": 103.9023
     },
     {
         "name": "Punggol Plaza",
-        "address": "168 Punggol Field Singapore 820168",
-        "latitude": 1.374161,
-        "longitude": 103.779405
+        "address": "168 Punggol Field, Singapore 820168",
+        "latitude": 1.3943,
+        "longitude": 103.9131
+    },
+    {
+        "name": "Northshore Plaza",
+        "address": "407 Northshore Drive, Singapore 820407",
+        "latitude": 1.4176,
+        "longitude": 103.9017
     },
     {
         "name": "Queensway Shopping Centre",
-        "address": "1 Queensway Singapore 149053",
-        "latitude": 1.392885,
-        "longitude": 103.783387
+        "address": "1 Queensway, Singapore 149053",
+        "latitude": 1.2877,
+        "longitude": 103.8032
+    },
+    {
+        "name": "Anchorpoint",
+        "address": "370 Alexandra Road, Singapore 159953",
+        "latitude": 1.2887,
+        "longitude": 103.8056
     },
     {
         "name": "Sim Lim Square",
-        "address": "1 Rochor Canal Road Singapore 188504",
-        "latitude": 1.373504,
-        "longitude": 103.784189
+        "address": "1 Rochor Canal Road, Singapore 188504",
+        "latitude": 1.303,
+        "longitude": 103.8522
     },
     {
         "name": "Canberra Plaza",
-        "address": "133 Canberra View Singapore 750133",
-        "latitude": 1.393084,
-        "longitude": 103.845715
+        "address": "133 Canberra View, Singapore 750133",
+        "latitude": 1.443,
+        "longitude": 103.8299
     },
     {
         "name": "Sun Plaza",
-        "address": "30 Sembawang Drive Singapore 757713",
-        "latitude": 1.339816,
-        "longitude": 103.796424
+        "address": "30 Sembawang Drive, Singapore 757713",
+        "latitude": 1.4482,
+        "longitude": 103.8198
     },
     {
         "name": "Rivervale Plaza",
-        "address": "118 Rivervale Drive Singapore 540118",
-        "latitude": 1.388316,
-        "longitude": 103.873479
+        "address": "118 Rivervale Drive, Singapore 540118",
+        "latitude": 1.3916,
+        "longitude": 103.9049
     },
     {
         "name": "Compass One",
-        "address": "1 Sengkang Square Singapore 545078",
-        "latitude": 1.387262,
-        "longitude": 103.824001
+        "address": "1 Sengkang Square, Singapore 545078",
+        "latitude": 1.3917,
+        "longitude": 103.8954
     },
     {
         "name": "The Seletar Mall",
-        "address": "33 Sengkang West Avenue Singapore 797653",
-        "latitude": 1.374324,
-        "longitude": 103.917592
+        "address": "33 Sengkang West Avenue, Singapore 797653",
+        "latitude": 1.3915,
+        "longitude": 103.8763
     },
     {
         "name": "NEX",
-        "address": "23 Serangoon Central Singapore 556083",
-        "latitude": 1.310877,
-        "longitude": 103.800289
+        "address": "23 Serangoon Central, Singapore 556083",
+        "latitude": 1.3508,
+        "longitude": 103.8721
     },
     {
         "name": "Eastpoint Mall",
-        "address": "3 Simei Street 6 Singapore 528833",
-        "latitude": 1.375168,
-        "longitude": 103.740442
+        "address": "3 Simei Street 6, Singapore 528833",
+        "latitude": 1.3425,
+        "longitude": 103.953
     },
     {
         "name": "Tampines Mall",
-        "address": "4 Tampines Central 5 Singapore 529510",
-        "latitude": 1.344285,
-        "longitude": 103.900665
+        "address": "4 Tampines Central 5, Singapore 529510",
+        "latitude": 1.3525,
+        "longitude": 103.9447
     },
     {
-        "name": "Tampines 1 Mall",
-        "address": "10 Tampines Central 1 Singapore 529536",
-        "latitude": 1.296849,
-        "longitude": 103.915064
+        "name": "Tampines 1",
+        "address": "10 Tampines Central 1, Singapore 529536",
+        "latitude": 1.354,
+        "longitude": 103.945
     },
     {
         "name": "Century Square",
-        "address": "2 Tampines Central 5 Singapore 529509",
-        "latitude": 1.282753,
-        "longitude": 103.805711
+        "address": "2 Tampines Central 5, Singapore 529509",
+        "latitude": 1.352,
+        "longitude": 103.9436
+    },
+    {
+        "name": "Our Tampines Hub",
+        "address": "1 Tampines Walk, Singapore 528523",
+        "latitude": 1.3529,
+        "longitude": 103.9407
     },
     {
         "name": "Tanglin Mall",
-        "address": "163 Tanglin Road Singapore 247933",
-        "latitude": 1.297036,
-        "longitude": 103.871548
+        "address": "163 Tanglin Road, Singapore 247933",
+        "latitude": 1.3045,
+        "longitude": 103.8239
     },
     {
         "name": "Thomson Plaza",
-        "address": "301 Upper Thomson Road Singapore 574408",
-        "latitude": 1.317727,
-        "longitude": 103.905887
+        "address": "301 Upper Thomson Road, Singapore 574408",
+        "latitude": 1.3543,
+        "longitude": 103.83
     },
     {
         "name": "Tiong Bahru Plaza",
-        "address": "302 Tiong Bahru Road Singapore 168732",
-        "latitude": 1.369825,
-        "longitude": 103.751405
+        "address": "302 Tiong Bahru Road, Singapore 168732",
+        "latitude": 1.2866,
+        "longitude": 103.8271
+    },
+    {
+        "name": "Causeway Point",
+        "address": "1 Woodlands Square, Singapore 738099",
+        "latitude": 1.4361,
+        "longitude": 103.786
+    },
+    {
+        "name": "Woodlands Civic Centre",
+        "address": "900 South Woodlands Drive, Singapore 730900",
+        "latitude": 1.4359,
+        "longitude": 103.7864
+    },
+    {
+        "name": "Lot One",
+        "address": "21 Choa Chu Kang Avenue 4, Singapore 689812",
+        "latitude": 1.385,
+        "longitude": 103.7451
+    },
+    {
+        "name": "Bukit Panjang Plaza",
+        "address": "1 Jelebu Road, Singapore 677743",
+        "latitude": 1.3804,
+        "longitude": 103.7646
+    },
+    {
+        "name": "Beauty World Centre",
+        "address": "144 Upper Bukit Timah Road, Singapore 588177",
+        "latitude": 1.3424,
+        "longitude": 103.7762
+    },
+    {
+        "name": "The Rail Mall",
+        "address": "380 Upper Bukit Timah Road, Singapore 678040",
+        "latitude": 1.3591,
+        "longitude": 103.767
+    },
+    {
+        "name": "Grantral Mall @ MacPherson",
+        "address": "601 MacPherson Road, Singapore 368242",
+        "latitude": 1.3314,
+        "longitude": 103.8794
     }
 ]

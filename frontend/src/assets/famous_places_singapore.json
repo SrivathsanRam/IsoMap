@@ -1,62 +1,284 @@
 [
     {
         "name": "Marina Bay Sands",
-        "address": "10 Bayfront Ave, Singapore 018956",
-        "latitude": 1.2833965,
-        "longitude": 103.8607526
+        "address": "10 Bayfront Avenue, Singapore 018956",
+        "latitude": 1.2834,
+        "longitude": 103.8607
     },
     {
         "name": "Gardens by the Bay",
-        "address": "18 Marina Gardens Dr, Singapore 018953",
-        "latitude": 1.284722,
-        "longitude": 103.865
+        "address": "18 Marina Gardens Drive, Singapore 018953",
+        "latitude": 1.2816,
+        "longitude": 103.8636
     },
     {
         "name": "Singapore Flyer",
-        "address": "30 Raffles Ave, Singapore 039803",
+        "address": "30 Raffles Avenue, Singapore 039803",
         "latitude": 1.2893,
         "longitude": 103.8631
     },
     {
         "name": "Merlion Park",
-        "address": "One Fullerton, Singapore 049213",
+        "address": "1 Fullerton Road, Singapore 049213",
         "latitude": 1.2868,
         "longitude": 103.8545
     },
     {
         "name": "Jewel Changi Airport",
         "address": "78 Airport Boulevard, Singapore 819666",
-        "latitude": 1.36074,
-        "longitude": 103.98956
-    },
-    {
-        "name": "Sri Mariamman Temple",
-        "address": "244 South Bridge Road",
-        "latitude": 1.282,
-        "longitude": 103.84538
-    },
-    {
-        "name": "Armenian Church",
-        "address": "60 Hill Street",
-        "latitude": 1.293,
-        "longitude": 103.84966
-    },
-    {
-        "name": "CHIJMES",
-        "address": "30 Victoria Street",
-        "latitude": 1.295,
-        "longitude": 103.85168
-    },
-    {
-        "name": "St Andrew's Cathedral",
-        "address": "11 St Andrew's Road",
-        "latitude": 1.292,
-        "longitude": 103.85231
+        "latitude": 1.3602,
+        "longitude": 103.9898
     },
     {
         "name": "National Gallery Singapore",
-        "address": "1 St Andrew's Rd, 01 – 01, Singapore 178957",
+        "address": "1 St Andrew's Road, Singapore 178957",
         "latitude": 1.2903,
         "longitude": 103.8516
+    },
+    {
+        "name": "Singapore Botanic Gardens",
+        "address": "1 Cluny Road, Singapore 259569",
+        "latitude": 1.3138,
+        "longitude": 103.8159
+    },
+    {
+        "name": "Universal Studios Singapore",
+        "address": "8 Sentosa Gateway, Singapore 098269",
+        "latitude": 1.254,
+        "longitude": 103.8238
+    },
+    {
+        "name": "Singapore Oceanarium",
+        "address": "8 Sentosa Gateway, Sentosa Island, Singapore 098269",
+        "latitude": 1.258,
+        "longitude": 103.8203
+    },
+    {
+        "name": "Sentosa Merlion Plaza / Imbiah Lookout",
+        "address": "Imbiah Road, Sentosa, Singapore",
+        "latitude": 1.2539,
+        "longitude": 103.8178
+    },
+    {
+        "name": "Fort Siloso",
+        "address": "Siloso Road, Singapore 099981",
+        "latitude": 1.2581,
+        "longitude": 103.8108
+    },
+    {
+        "name": "Sentosa Sensoryscape",
+        "address": "3 Siloso Road, Singapore 098977",
+        "latitude": 1.2548,
+        "longitude": 103.8185
+    },
+    {
+        "name": "Palawan Beach",
+        "address": "Sentosa Island, Singapore",
+        "latitude": 1.2494,
+        "longitude": 103.822
+    },
+    {
+        "name": "Siloso Beach",
+        "address": "Sentosa Island, Singapore",
+        "latitude": 1.2549,
+        "longitude": 103.8113
+    },
+    {
+        "name": "Chinatown",
+        "address": "Pagoda Street, Singapore 059207",
+        "latitude": 1.2838,
+        "longitude": 103.8443
+    },
+    {
+        "name": "Buddha Tooth Relic Temple",
+        "address": "288 South Bridge Road, Singapore 058840",
+        "latitude": 1.2815,
+        "longitude": 103.8442
+    },
+    {
+        "name": "Sri Mariamman Temple",
+        "address": "244 South Bridge Road, Singapore 058793",
+        "latitude": 1.2827,
+        "longitude": 103.8453
+    },
+    {
+        "name": "Kampong Glam",
+        "address": "Bussorah Street, Singapore",
+        "latitude": 1.3024,
+        "longitude": 103.859
+    },
+    {
+        "name": "Sultan Mosque",
+        "address": "3 Muscat Street, Singapore 198833",
+        "latitude": 1.3023,
+        "longitude": 103.859
+    },
+    {
+        "name": "Haji Lane",
+        "address": "Haji Lane, Singapore 189214",
+        "latitude": 1.3008,
+        "longitude": 103.8593
+    },
+    {
+        "name": "Little India",
+        "address": "Serangoon Road, Singapore",
+        "latitude": 1.3066,
+        "longitude": 103.8518
+    },
+    {
+        "name": "House of Tan Teng Niah",
+        "address": "37 Kerbau Road, Singapore 219168",
+        "latitude": 1.3065,
+        "longitude": 103.851
+    },
+    {
+        "name": "Orchard Road",
+        "address": "Orchard Road, Singapore",
+        "latitude": 1.304,
+        "longitude": 103.832
+    },
+    {
+        "name": "Clarke Quay",
+        "address": "3 River Valley Road, Singapore 179024",
+        "latitude": 1.2906,
+        "longitude": 103.8465
+    },
+    {
+        "name": "Boat Quay",
+        "address": "Boat Quay, Singapore",
+        "latitude": 1.2872,
+        "longitude": 103.8493
+    },
+    {
+        "name": "Esplanade - Theatres on the Bay",
+        "address": "1 Esplanade Drive, Singapore 038981",
+        "latitude": 1.2897,
+        "longitude": 103.8559
+    },
+    {
+        "name": "Helix Bridge",
+        "address": "Marina Bay, Singapore",
+        "latitude": 1.2875,
+        "longitude": 103.8607
+    },
+    {
+        "name": "ArtScience Museum",
+        "address": "6 Bayfront Avenue, Singapore 018974",
+        "latitude": 1.2863,
+        "longitude": 103.8593
+    },
+    {
+        "name": "National Museum of Singapore",
+        "address": "93 Stamford Road, Singapore 178897",
+        "latitude": 1.2966,
+        "longitude": 103.8485
+    },
+    {
+        "name": "Asian Civilisations Museum",
+        "address": "1 Empress Place, Singapore 179555",
+        "latitude": 1.2871,
+        "longitude": 103.8513
+    },
+    {
+        "name": "Fort Canning Park",
+        "address": "River Valley Road, Singapore 179037",
+        "latitude": 1.2955,
+        "longitude": 103.8453
+    },
+    {
+        "name": "Haw Par Villa",
+        "address": "262 Pasir Panjang Road, Singapore 118628",
+        "latitude": 1.2834,
+        "longitude": 103.7818
+    },
+    {
+        "name": "Singapore Zoo",
+        "address": "80 Mandai Lake Road, Singapore 729826",
+        "latitude": 1.4043,
+        "longitude": 103.793
+    },
+    {
+        "name": "Night Safari",
+        "address": "80 Mandai Lake Road, Singapore 729826",
+        "latitude": 1.4021,
+        "longitude": 103.7878
+    },
+    {
+        "name": "Bird Paradise",
+        "address": "20 Mandai Lake Road, Singapore 729825",
+        "latitude": 1.4115,
+        "longitude": 103.7903
+    },
+    {
+        "name": "River Wonders",
+        "address": "80 Mandai Lake Road, Singapore 729826",
+        "latitude": 1.4049,
+        "longitude": 103.7907
+    },
+    {
+        "name": "Pulau Ubin Village",
+        "address": "Pulau Ubin, Singapore",
+        "latitude": 1.4042,
+        "longitude": 103.9606
+    },
+    {
+        "name": "Chek Jawa Wetlands",
+        "address": "Chek Jawa Trail, Pulau Ubin, Singapore 508418",
+        "latitude": 1.4121,
+        "longitude": 103.991
+    },
+    {
+        "name": "MacRitchie Reservoir",
+        "address": "MacRitchie Reservoir Park, Singapore 298717",
+        "latitude": 1.3416,
+        "longitude": 103.8337
+    },
+    {
+        "name": "Henderson Waves",
+        "address": "Henderson Road, Singapore 159557",
+        "latitude": 1.276,
+        "longitude": 103.816
+    },
+    {
+        "name": "Southern Ridges",
+        "address": "Henderson Road / Mount Faber, Singapore",
+        "latitude": 1.2794,
+        "longitude": 103.8127
+    },
+    {
+        "name": "Mount Faber Peak",
+        "address": "109 Mount Faber Road, Singapore 099203",
+        "latitude": 1.2713,
+        "longitude": 103.8193
+    },
+    {
+        "name": "Old Hill Street Police Station",
+        "address": "140 Hill Street, Singapore 179369",
+        "latitude": 1.2908,
+        "longitude": 103.8488
+    },
+    {
+        "name": "CHIJMES",
+        "address": "30 Victoria Street, Singapore 187996",
+        "latitude": 1.2954,
+        "longitude": 103.8523
+    },
+    {
+        "name": "Raffles Hotel Singapore",
+        "address": "1 Beach Road, Singapore 189673",
+        "latitude": 1.2949,
+        "longitude": 103.8546
+    },
+    {
+        "name": "Lau Pa Sat",
+        "address": "18 Raffles Quay, Singapore 048582",
+        "latitude": 1.2807,
+        "longitude": 103.8504
+    },
+    {
+        "name": "The Fullerton Hotel Singapore",
+        "address": "1 Fullerton Square, Singapore 049178",
+        "latitude": 1.2863,
+        "longitude": 103.853
     }
 ]

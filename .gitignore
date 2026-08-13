@@ -41,6 +41,6 @@ yarn-error.log*
 dist/
 dist
 
-# Generated GTFS graph artifacts
+# Generated transit and pedestrian graph artifacts
 /gtfs/generated/*
 !/gtfs/generated/README.md

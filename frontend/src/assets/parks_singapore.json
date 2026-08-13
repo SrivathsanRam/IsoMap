@@ -1,0 +1,320 @@
+[
+    {
+        "name": "East Coast Park",
+        "address": "East Coast Park Service Road, Singapore",
+        "latitude": 1.3008,
+        "longitude": 103.912
+    },
+    {
+        "name": "Fort Canning Park",
+        "address": "River Valley Road, Singapore 179037",
+        "latitude": 1.2955,
+        "longitude": 103.8453
+    },
+    {
+        "name": "Singapore Botanic Gardens",
+        "address": "1 Cluny Road, Singapore 259569",
+        "latitude": 1.3138,
+        "longitude": 103.8159
+    },
+    {
+        "name": "Jurong Lake Gardens",
+        "address": "Yuan Ching Road, Singapore 618661",
+        "latitude": 1.3387,
+        "longitude": 103.7296
+    },
+    {
+        "name": "Bishan-Ang Mo Kio Park",
+        "address": "1384 Ang Mo Kio Avenue 1, Singapore 569932",
+        "latitude": 1.3623,
+        "longitude": 103.8462
+    },
+    {
+        "name": "Pasir Ris Park",
+        "address": "Pasir Ris Road, Singapore 519142",
+        "latitude": 1.381,
+        "longitude": 103.9506
+    },
+    {
+        "name": "Punggol Waterway Park",
+        "address": "Sentul Crescent, Singapore 821313",
+        "latitude": 1.41,
+        "longitude": 103.9041
+    },
+    {
+        "name": "West Coast Park",
+        "address": "West Coast Ferry Road, Singapore 126978",
+        "latitude": 1.2907,
+        "longitude": 103.7652
+    },
+    {
+        "name": "Labrador Nature Reserve",
+        "address": "Labrador Villa Road, Singapore 119187",
+        "latitude": 1.2665,
+        "longitude": 103.8023
+    },
+    {
+        "name": "Mount Faber Park",
+        "address": "Telok Blangah Road, Singapore 099448",
+        "latitude": 1.2734,
+        "longitude": 103.8176
+    },
+    {
+        "name": "HortPark",
+        "address": "33 Hyderabad Road, Singapore 119578",
+        "latitude": 1.2782,
+        "longitude": 103.8015
+    },
+    {
+        "name": "Kent Ridge Park",
+        "address": "Vigilante Drive, Singapore 118176",
+        "latitude": 1.2832,
+        "longitude": 103.7913
+    },
+    {
+        "name": "Telok Blangah Hill Park",
+        "address": "10 Telok Blangah Green, Singapore 109178",
+        "latitude": 1.2768,
+        "longitude": 103.8128
+    },
+    {
+        "name": "Admiralty Park",
+        "address": "31 Riverside Road, Singapore 739087",
+        "latitude": 1.4411,
+        "longitude": 103.7806
+    },
+    {
+        "name": "Woodlands Waterfront Park",
+        "address": "Admiralty Road West, Singapore 759956",
+        "latitude": 1.4524,
+        "longitude": 103.7801
+    },
+    {
+        "name": "Sembawang Park",
+        "address": "Sembawang Road, Singapore 758459",
+        "latitude": 1.4615,
+        "longitude": 103.8364
+    },
+    {
+        "name": "Yishun Park",
+        "address": "Yishun Central, Singapore",
+        "latitude": 1.4247,
+        "longitude": 103.8442
+    },
+    {
+        "name": "Lower Seletar Reservoir Park",
+        "address": "Yishun Avenue 1, Singapore",
+        "latitude": 1.4136,
+        "longitude": 103.8337
+    },
+    {
+        "name": "Upper Seletar Reservoir Park",
+        "address": "Mandai Road, Singapore 779384",
+        "latitude": 1.3981,
+        "longitude": 103.8057
+    },
+    {
+        "name": "Sungei Buloh Wetland Reserve",
+        "address": "301 Neo Tiew Crescent, Singapore 718925",
+        "latitude": 1.4449,
+        "longitude": 103.7306
+    },
+    {
+        "name": "Kranji Marshes",
+        "address": "11 Neo Tiew Lane 2, Singapore 718814",
+        "latitude": 1.4208,
+        "longitude": 103.7204
+    },
+    {
+        "name": "Chestnut Nature Park",
+        "address": "Chestnut Avenue, Singapore 679514",
+        "latitude": 1.3754,
+        "longitude": 103.7778
+    },
+    {
+        "name": "Rifle Range Nature Park",
+        "address": "Rifle Range Road, Singapore 589322",
+        "latitude": 1.3487,
+        "longitude": 103.7798
+    },
+    {
+        "name": "Dairy Farm Nature Park",
+        "address": "100 Dairy Farm Road, Singapore 679057",
+        "latitude": 1.3642,
+        "longitude": 103.7765
+    },
+    {
+        "name": "Bukit Timah Nature Reserve",
+        "address": "177 Hindhede Drive, Singapore 589333",
+        "latitude": 1.354,
+        "longitude": 103.7764
+    },
+    {
+        "name": "Hindhede Nature Park",
+        "address": "Hindhede Drive, Singapore 589333",
+        "latitude": 1.3487,
+        "longitude": 103.7761
+    },
+    {
+        "name": "Windsor Nature Park",
+        "address": "30 Venus Drive, Singapore 573858",
+        "latitude": 1.359,
+        "longitude": 103.827
+    },
+    {
+        "name": "MacRitchie Reservoir Park",
+        "address": "Lornie Road, Singapore 298735",
+        "latitude": 1.3416,
+        "longitude": 103.8337
+    },
+    {
+        "name": "Thomson Nature Park",
+        "address": "Upper Thomson Road, Singapore",
+        "latitude": 1.3834,
+        "longitude": 103.8148
+    },
+    {
+        "name": "Springleaf Nature Park",
+        "address": "1230 Upper Thomson Road, Singapore 787129",
+        "latitude": 1.4007,
+        "longitude": 103.8189
+    },
+    {
+        "name": "Coney Island Park",
+        "address": "Punggol Promenade Nature Walk, Singapore",
+        "latitude": 1.4098,
+        "longitude": 103.9239
+    },
+    {
+        "name": "Sengkang Riverside Park",
+        "address": "Anchorvale Street, Singapore 544834",
+        "latitude": 1.3982,
+        "longitude": 103.8864
+    },
+    {
+        "name": "Tampines Eco Green",
+        "address": "Tampines Avenue 9, Singapore 529787",
+        "latitude": 1.3618,
+        "longitude": 103.9513
+    },
+    {
+        "name": "Bedok Reservoir Park",
+        "address": "Bedok Reservoir Road, Singapore 479244",
+        "latitude": 1.3397,
+        "longitude": 103.9249
+    },
+    {
+        "name": "Changi Beach Park",
+        "address": "Nicoll Drive, Singapore 498991",
+        "latitude": 1.3905,
+        "longitude": 103.9924
+    },
+    {
+        "name": "Changi Bay Point",
+        "address": "Aviation Park Road, Singapore",
+        "latitude": 1.32,
+        "longitude": 104.013
+    },
+    {
+        "name": "Marine Cove / East Coast Park Area C",
+        "address": "1000 East Coast Parkway, Singapore 449876",
+        "latitude": 1.3004,
+        "longitude": 103.9125
+    },
+    {
+        "name": "Tiong Bahru Park",
+        "address": "1 Henderson Road, Singapore 159561",
+        "latitude": 1.2868,
+        "longitude": 103.8232
+    },
+    {
+        "name": "Pearl's Hill City Park",
+        "address": "Pearl's Hill Road, Singapore 168892",
+        "latitude": 1.2855,
+        "longitude": 103.8396
+    },
+    {
+        "name": "Esplanade Park",
+        "address": "Connaught Drive, Singapore 179682",
+        "latitude": 1.2906,
+        "longitude": 103.8538
+    },
+    {
+        "name": "War Memorial Park",
+        "address": "Nicoll Highway / Beach Road, Singapore 189768",
+        "latitude": 1.2934,
+        "longitude": 103.8554
+    },
+    {
+        "name": "Marina Barrage",
+        "address": "8 Marina Gardens Drive, Singapore 018951",
+        "latitude": 1.2808,
+        "longitude": 103.87
+    },
+    {
+        "name": "Bay East Garden",
+        "address": "11 Rhu Cross, Singapore 437440",
+        "latitude": 1.295,
+        "longitude": 103.8726
+    },
+    {
+        "name": "Chinese Garden",
+        "address": "1 Chinese Garden Road, Singapore 619795",
+        "latitude": 1.3382,
+        "longitude": 103.7304
+    },
+    {
+        "name": "Japanese Garden",
+        "address": "Jurong Lake Gardens, Singapore",
+        "latitude": 1.3343,
+        "longitude": 103.729
+    },
+    {
+        "name": "Choa Chu Kang Park",
+        "address": "Choa Chu Kang Drive, Singapore 689810",
+        "latitude": 1.3829,
+        "longitude": 103.7472
+    },
+    {
+        "name": "Bukit Batok Nature Park",
+        "address": "Bukit Batok East Avenue 2, Singapore 659761",
+        "latitude": 1.3485,
+        "longitude": 103.7642
+    },
+    {
+        "name": "Bukit Batok Town Park (Little Guilin)",
+        "address": "Bukit Batok East Avenue 5, Singapore 650242",
+        "latitude": 1.355,
+        "longitude": 103.7536
+    },
+    {
+        "name": "Bukit Panjang Park",
+        "address": "Bukit Panjang Ring Road, Singapore",
+        "latitude": 1.3797,
+        "longitude": 103.7701
+    },
+    {
+        "name": "Zhenghua Nature Park",
+        "address": "Bangkit Road, Singapore",
+        "latitude": 1.3848,
+        "longitude": 103.7769
+    },
+    {
+        "name": "Clementi Woods Park",
+        "address": "West Coast Road, Singapore 126782",
+        "latitude": 1.2999,
+        "longitude": 103.768
+    },
+    {
+        "name": "one-north Park",
+        "address": "Biopolis Road, Singapore 138671",
+        "latitude": 1.3035,
+        "longitude": 103.7916
+    },
+    {
+        "name": "Rail Corridor - Bukit Timah Railway Station",
+        "address": "1 Railway Station, Singapore 599938",
+        "latitude": 1.3342,
+        "longitude": 103.7819
+    }
+]
