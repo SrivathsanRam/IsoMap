@@ -44,7 +44,9 @@ export function intersectMultiPolygons(
   const normalized = geometries
     .map(normalizeMultiPolygon)
     .filter((geometry): geometry is MultiPolygonGeometry => geometry !== null);
-  if (normalized.length === 0) {
+  // Every member constrains the result. An empty/invalid member area makes the
+  // all-members intersection empty; it must never be silently skipped.
+  if (normalized.length === 0 || normalized.length !== geometries.length) {
     return null;
   }
   if (normalized.length === 1) {

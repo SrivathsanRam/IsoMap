@@ -234,6 +234,17 @@ export function PresetOverlaySidebar({
               <PresetRow
                 key={preset.id}
                 preset={preset}
+                visibleLocationCount={
+                  showOnlyInsideIsochrone && isochroneGeometry
+                    ? preset.locations.filter((location) =>
+                        pointInMultiPolygon(
+                          location.longitude,
+                          location.latitude,
+                          isochroneGeometry,
+                        ),
+                      ).length
+                    : preset.locations.length
+                }
                 isActive={activePresetIDs.includes(preset.id)}
                 vote={votes[preset.id]}
                 onToggle={() => onTogglePreset(preset)}
@@ -272,12 +283,14 @@ export function PresetOverlaySidebar({
 
 function PresetRow({
   preset,
+  visibleLocationCount,
   isActive,
   vote,
   onToggle,
   onVote,
 }: {
   preset: PresetOverlay;
+  visibleLocationCount: number;
   isActive: boolean;
   vote?: "up" | "down";
   onToggle: () => void;
@@ -291,7 +304,10 @@ function PresetRow({
       <button type="button" className="preset-main" onClick={onToggle}>
         <span>{preset.name}</span>
         <small>
-          {preset.source === "provided" ? "Provided" : "Community"} · {preset.locations.length} places
+          {preset.source === "provided" ? "Provided" : "Community"} · {visibleLocationCount}
+          {visibleLocationCount !== preset.locations.length
+            ? ` of ${preset.locations.length}`
+            : ""} places
         </small>
       </button>
       {preset.source === "community" && (
