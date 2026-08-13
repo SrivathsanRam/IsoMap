@@ -378,11 +378,17 @@ export default function OutingPage() {
           <button
             type="button"
             onClick={generateOverlap}
-            disabled={isLoading || membersWithLocations.length < 2}
+            disabled={isLoading}
             className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Generating..." : "Find common area"}
           </button>
+
+          {membersWithLocations.length < 2 && (
+            <p className="text-xs text-slate-500">
+              The latest member list will be refreshed when you find the common area.
+            </p>
+          )}
 
           {overlapMessage && (
             <p

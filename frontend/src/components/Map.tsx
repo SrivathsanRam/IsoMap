@@ -80,6 +80,7 @@ export function Map() {
   const [activePresetIDs, setActivePresetIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(mapboxAccessToken ? "" : "MAPBOX_ACCESS_TOKEN is not set.");
+  const presetFilterGeometry = showOnlyPresetsInsideIsochrone ? isochroneGeometry : null;
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) {
@@ -132,9 +133,9 @@ export function Map() {
 
     activePresets.forEach((preset, presetIndex) => {
       const color = overlayColors[presetIndex % overlayColors.length];
-      const visibleLocations = showOnlyPresetsInsideIsochrone && isochroneGeometry
+      const visibleLocations = presetFilterGeometry
         ? preset.locations.filter((location) =>
-            pointInMultiPolygon(location.longitude, location.latitude, isochroneGeometry),
+            pointInMultiPolygon(location.longitude, location.latitude, presetFilterGeometry),
           )
         : preset.locations;
       visibleLocations.forEach((location) => {
@@ -155,7 +156,7 @@ export function Map() {
     if (bounds.length > 0) {
       map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
     }
-  }, [activePresetIDs, isochroneGeometry, presets, showOnlyPresetsInsideIsochrone]);
+  }, [activePresetIDs, presetFilterGeometry, presets]);
 
   function changeMode(nextMode: MapToolMode) {
     cancelScheduledDepartureRequest();
