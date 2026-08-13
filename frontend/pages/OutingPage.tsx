@@ -192,8 +192,7 @@ export default function OutingPage() {
     setError("")
     setOverlapMessage("")
     try {
-      // Refresh immediately before computing so newly joined members and their
-      // latest travel limits are included without requiring a page reload.
+      // Get fresh members.
       const latestOuting = await getOuting(token)
       setOuting(latestOuting)
       const members = latestOuting.members.filter(hasMemberLocation)

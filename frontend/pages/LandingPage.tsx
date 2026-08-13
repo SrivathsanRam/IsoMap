@@ -30,7 +30,7 @@ export default function LandingPage() {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${path}`)
     } catch {
-      // The outing page still opens if clipboard permission is unavailable.
+      // Link still opens.
     }
     navigate(path)
   }

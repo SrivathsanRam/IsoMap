@@ -1,5 +1,6 @@
-# Raw feeds
+# Raw data
 
-Source GTFS archives live here. `singapore-gtfs.zip` is the current Singapore feed and should remain unchanged by preprocessing.
-`Footpath_Mar2026.zip` is the source LTA footpath shapefile (SVY21 / EPSG:3414)
-used by `backend/cmd/footpath-build`; preprocessing never modifies it.
+- `singapore-gtfs.zip`: transit feed
+- `Footpath_Mar2026.zip`: LTA footpaths in SVY21
+
+Build scripts read these ZIP files without changing them.
