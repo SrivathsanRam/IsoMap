@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { GeoJSONPosition, MultiPolygonGeometry } from "../../types";
-import { intersectMultiPolygons, pointInMultiPolygon } from "./geojson.ts";
+import { pointInMultiPolygon } from "./geojson.ts";
+import { intersectMultiPolygons } from "./geojsonIntersection.ts";
 
 test("pointInMultiPolygon handles disconnected polygons, holes, and boundaries", () => {
   const geometry: MultiPolygonGeometry = {
@@ -53,6 +54,15 @@ test("intersectMultiPolygons respects holes and returns null for an empty common
   };
 
   assert.equal(intersectMultiPolygons([withHole, insideHole]), null);
+  assert.equal(
+    intersectMultiPolygons([
+      withHole,
+      { type: "MultiPolygon", coordinates: [] },
+      withHole,
+    ]),
+    null,
+    "an empty member is not ignored",
+  );
 });
 
 function square(minX: number, minY: number, maxX: number, maxY: number): GeoJSONPosition[] {

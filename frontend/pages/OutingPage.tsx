@@ -9,7 +9,8 @@ import {
 } from "../src/lib/departureTime"
 import { TimeOfDayControl } from "../src/components/TimeOfDayControl"
 import { PlaceSearchInput, type Place } from "../src/components/PlaceSearchInput"
-import { intersectMultiPolygons, multiPolygonAreaKm2 } from "../src/lib/geojson"
+import { multiPolygonAreaKm2 } from "../src/lib/geojson"
+import { intersectMultiPolygons } from "../src/lib/geojsonIntersection"
 import {
   getIsochrone,
   getOuting,
