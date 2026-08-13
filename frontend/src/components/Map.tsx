@@ -19,6 +19,7 @@ import {
   DEFAULT_ISOCHRONE_DEPARTURE_TIME,
   toSingaporeDepartureRFC3339,
 } from "../lib/departureTime";
+import { multiPolygonAreaKm2, pointInMultiPolygon } from "../lib/geojson";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const mapboxAccessToken =
@@ -73,6 +74,8 @@ export function Map() {
   const [searchProximity, setSearchProximity] = useState({ lat: 1.3521, lon: 103.8198 });
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
   const [isochroneTransitUsed, setIsochroneTransitUsed] = useState<boolean | null>(null);
+  const [isochroneGeometry, setIsochroneGeometry] = useState<MultiPolygonGeometry | null>(null);
+  const [showOnlyPresetsInsideIsochrone, setShowOnlyPresetsInsideIsochrone] = useState(false);
   const [presets, setPresets] = useState<PresetOverlay[]>([]);
   const [activePresetIDs, setActivePresetIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -129,7 +132,12 @@ export function Map() {
 
     activePresets.forEach((preset, presetIndex) => {
       const color = overlayColors[presetIndex % overlayColors.length];
-      preset.locations.forEach((location) => {
+      const visibleLocations = showOnlyPresetsInsideIsochrone && isochroneGeometry
+        ? preset.locations.filter((location) =>
+            pointInMultiPolygon(location.longitude, location.latitude, isochroneGeometry),
+          )
+        : preset.locations;
+      visibleLocations.forEach((location) => {
         const position: L.LatLngExpression = [location.latitude, location.longitude];
         bounds.push(position);
         L.circleMarker(position, {
@@ -147,7 +155,7 @@ export function Map() {
     if (bounds.length > 0) {
       map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 14 });
     }
-  }, [activePresetIDs, presets]);
+  }, [activePresetIDs, isochroneGeometry, presets, showOnlyPresetsInsideIsochrone]);
 
   function changeMode(nextMode: MapToolMode) {
     cancelScheduledDepartureRequest();
@@ -159,6 +167,8 @@ export function Map() {
     setIsochronePlace(null);
     setIsochroneAreaKm2(null);
     setIsochroneTransitUsed(null);
+    setIsochroneGeometry(null);
+    setShowOnlyPresetsInsideIsochrone(false);
     setIsLoading(false);
     setError("");
   }
@@ -175,6 +185,8 @@ export function Map() {
     setIsochronePlace(null);
     setIsochroneAreaKm2(null);
     setIsochroneTransitUsed(null);
+    setIsochroneGeometry(null);
+    setShowOnlyPresetsInsideIsochrone(false);
     setIsLoading(false);
     setError("");
     clearMapLayers();
@@ -243,7 +255,8 @@ export function Map() {
           weight: 3,
         },
       }).addTo(map);
-      setIsochroneAreaKm2(calculateMultiPolygonAreaKm2(feature.geometry));
+      setIsochroneGeometry(feature.geometry);
+      setIsochroneAreaKm2(multiPolygonAreaKm2(feature.geometry));
       setIsochroneTransitUsed(feature.properties.transit_used);
       const bounds = polygonRef.current.getBounds();
       if (bounds.isValid()) {
@@ -450,6 +463,9 @@ export function Map() {
       />
       <PresetOverlaySidebar
         activePresetIDs={activePresetIDs}
+        isochroneGeometry={isochroneGeometry}
+        showOnlyInsideIsochrone={showOnlyPresetsInsideIsochrone}
+        onShowOnlyInsideIsochroneChange={setShowOnlyPresetsInsideIsochrone}
         onPresetCreated={createPresetOverlay}
         onTogglePreset={togglePreset}
       />
@@ -469,17 +485,6 @@ function placeToLatLng(place: Place): L.LatLngExpression {
   return [Number(place.lat), Number(place.lon)];
 }
 
-function calculateMultiPolygonAreaKm2(geometry: MultiPolygonGeometry) {
-  return geometry.coordinates.reduce((total, polygon) => {
-    if (polygon.length === 0) {
-      return total;
-    }
-    const exterior = sphericalRingAreaKm2(polygon[0]);
-    const holes = polygon.slice(1).reduce((area, ring) => area + sphericalRingAreaKm2(ring), 0);
-    return total + Math.max(0, exterior - holes);
-  }, 0);
-}
-
 function transitRouteColor(mode: string): string {
   switch (mode) {
     case "BUS":
@@ -494,27 +499,6 @@ function transitRouteColor(mode: string): string {
     default:
       return "#2563eb";
   }
-}
-
-function sphericalRingAreaKm2(points: [number, number][]) {
-  if (points.length < 4) {
-    return 0;
-  }
-  const radiusMeters = 6_371_008.8;
-  let area = 0;
-
-  for (let i = 0; i < points.length; i += 1) {
-    const current = points[i];
-    const next = points[(i + 1) % points.length];
-    area += toRadians(next[0] - current[0]) *
-      (2 + Math.sin(toRadians(current[1])) + Math.sin(toRadians(next[1])));
-  }
-
-  return Math.abs((area * radiusMeters * radiusMeters) / 2) / 1_000_000;
-}
-
-function toRadians(value: number) {
-  return (value * Math.PI) / 180;
 }
 
 function escapeHTML(value: string) {

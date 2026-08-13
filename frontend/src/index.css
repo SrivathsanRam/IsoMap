@@ -186,6 +186,81 @@ button {
   color: #0f172a;
 }
 
+.preset-isochrone-filter {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe3e8;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: auto 1fr;
+  padding: 10px;
+}
+
+.preset-isochrone-filter > input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.preset-filter-switch {
+  background: #cbd5e1;
+  border-radius: 999px;
+  height: 22px;
+  position: relative;
+  transition: background-color 150ms ease;
+  width: 38px;
+}
+
+.preset-filter-switch::after {
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 25%);
+  content: "";
+  height: 16px;
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  transition: transform 150ms ease;
+  width: 16px;
+}
+
+.preset-isochrone-filter > input:checked + .preset-filter-switch {
+  background: #2563eb;
+}
+
+.preset-isochrone-filter > input:checked + .preset-filter-switch::after {
+  transform: translateX(16px);
+}
+
+.preset-isochrone-filter > input:focus-visible + .preset-filter-switch {
+  outline: 3px solid rgb(37 99 235 / 25%);
+  outline-offset: 2px;
+}
+
+.preset-isochrone-filter > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.preset-isochrone-filter strong {
+  color: #0f172a;
+  font-size: 12px;
+}
+
+.preset-isochrone-filter small {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.preset-isochrone-filter.unavailable {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .preset-list {
   display: grid;
   gap: 8px;

@@ -10,6 +10,8 @@ import {
   type PresetSort,
   voteCommunityPreset,
 } from "../lib/api";
+import type { MultiPolygonGeometry } from "../lib/api";
+import { pointInMultiPolygon } from "../lib/geojson";
 import { Place, PlaceInput } from "./SearchBar";
 
 export type PresetLocation = {
@@ -30,6 +32,9 @@ export type PresetOverlay = {
 
 type PresetOverlaySidebarProps = {
   activePresetIDs: string[];
+  isochroneGeometry: MultiPolygonGeometry | null;
+  showOnlyInsideIsochrone: boolean;
+  onShowOnlyInsideIsochroneChange: (enabled: boolean) => void;
   onPresetCreated: (preset: PresetOverlay) => void;
   onTogglePreset: (preset: PresetOverlay) => void;
 };
@@ -43,6 +48,9 @@ const providedPresets: PresetOverlay[] = [
 
 export function PresetOverlaySidebar({
   activePresetIDs,
+  isochroneGeometry,
+  showOnlyInsideIsochrone,
+  onShowOnlyInsideIsochroneChange,
   onPresetCreated,
   onTogglePreset,
 }: PresetOverlaySidebarProps) {
@@ -61,10 +69,19 @@ export function PresetOverlaySidebar({
   );
   const filteredPresets = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return presets;
-    }
     return presets.filter((preset) => {
+      if (
+        showOnlyInsideIsochrone &&
+        isochroneGeometry &&
+        !preset.locations.some((location) =>
+          pointInMultiPolygon(location.longitude, location.latitude, isochroneGeometry),
+        )
+      ) {
+        return false;
+      }
+      if (!normalizedQuery) {
+        return true;
+      }
       const haystack = [
         preset.name,
         preset.source,
@@ -74,7 +91,7 @@ export function PresetOverlaySidebar({
         .toLowerCase();
       return haystack.includes(normalizedQuery);
     });
-  }, [presets, query]);
+  }, [isochroneGeometry, presets, query, showOnlyInsideIsochrone]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -163,6 +180,27 @@ export function PresetOverlaySidebar({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search presets"
           />
+
+          <label
+            className={`preset-isochrone-filter${!isochroneGeometry ? " unavailable" : ""}`}
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              checked={showOnlyInsideIsochrone}
+              disabled={!isochroneGeometry}
+              onChange={(event) => onShowOnlyInsideIsochroneChange(event.target.checked)}
+            />
+            <span className="preset-filter-switch" aria-hidden="true" />
+            <span>
+              <strong>Show only presets inside isochrone</strong>
+              <small>
+                {isochroneGeometry
+                  ? "Hide preset places outside the reachable area"
+                  : "Generate an isochrone to enable this filter"}
+              </small>
+            </span>
+          </label>
 
           <div className="preset-sort" aria-label="Community preset sort">
             <button

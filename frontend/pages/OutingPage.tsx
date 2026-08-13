@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
-import { featureCollection, multiPolygon } from "@turf/helpers"
-import intersect from "@turf/intersect"
 
 import {
   DEFAULT_ISOCHRONE_DEPARTURE_TIME,
@@ -11,6 +9,7 @@ import {
 } from "../src/lib/departureTime"
 import { TimeOfDayControl } from "../src/components/TimeOfDayControl"
 import { PlaceSearchInput, type Place } from "../src/components/PlaceSearchInput"
+import { intersectMultiPolygons, multiPolygonAreaKm2 } from "../src/lib/geojson"
 import {
   getIsochrone,
   getOuting,
@@ -45,6 +44,8 @@ export default function OutingPage() {
   const [departureTime, setDepartureTime] = useState(DEFAULT_ISOCHRONE_DEPARTURE_TIME)
   const [searchProximity, setSearchProximity] = useState({ lat: 1.3521, lon: 103.8198 })
   const [polygons, setPolygons] = useState<MemberPolygon[]>([])
+  const [overlapGeometry, setOverlapGeometry] = useState<MultiPolygonGeometry | null>(null)
+  const [overlapMessage, setOverlapMessage] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
@@ -96,10 +97,10 @@ export default function OutingPage() {
 
   useEffect(() => {
     drawPolygons()
-  }, [polygons])
+  }, [overlapGeometry, polygons])
 
   const membersWithLocations = useMemo(
-    () => outing?.members.filter((member) => member.latitude && member.longitude) ?? [],
+    () => outing?.members.filter(hasMemberLocation) ?? [],
     [outing],
   )
 
@@ -119,11 +120,18 @@ export default function OutingPage() {
       setError("Enter your name to join.")
       return
     }
+    setIsLoading(true)
     setError("")
-    const member = await joinOuting(token, displayName.trim())
-    setCurrentMember(member)
-    setMinutes(member.max_travel_minutes)
-    await loadOuting()
+    try {
+      const member = await joinOuting(token, displayName.trim())
+      setCurrentMember(member)
+      setMinutes(member.max_travel_minutes)
+      await loadOuting()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not join outing")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function saveLocation() {
@@ -142,6 +150,7 @@ export default function OutingPage() {
         max_travel_minutes: minutes,
       })
       await loadOuting()
+      clearGeneratedAreas()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save location")
     } finally {
@@ -174,18 +183,25 @@ export default function OutingPage() {
   }
 
   async function generateOverlap() {
-    if (!outing) {
-      return
-    }
-    const members = outing.members.filter((member) => member.latitude && member.longitude)
-    if (members.length < 2) {
-      setError("At least two members with locations are needed.")
+    if (!token) {
       return
     }
 
     setIsLoading(true)
     setError("")
+    setOverlapMessage("")
     try {
+      // Refresh immediately before computing so newly joined members and their
+      // latest travel limits are included without requiring a page reload.
+      const latestOuting = await getOuting(token)
+      setOuting(latestOuting)
+      const members = latestOuting.members.filter(hasMemberLocation)
+      if (members.length < 2) {
+        setPolygons([])
+        setOverlapGeometry(null)
+        setError("At least two members with locations are needed.")
+        return
+      }
       const nextPolygons = await Promise.all(
         members.map(async (member) => ({
           memberId: member.id,
@@ -196,7 +212,19 @@ export default function OutingPage() {
           )).geometry,
         })),
       )
+      const overlap = intersectMultiPolygons(nextPolygons.map((entry) => entry.geometry))
       setPolygons(nextPolygons)
+      setOverlapGeometry(overlap)
+      if (overlap) {
+        const regionCount = overlap.coordinates.length
+        setOverlapMessage(
+          `${regionCount} common ${regionCount === 1 ? "area" : "areas"} · ${formatArea(
+            multiPolygonAreaKm2(overlap),
+          )}`,
+        )
+      } else {
+        setOverlapMessage("There is no area reachable by every member at this time.")
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not generate overlap")
     } finally {
@@ -226,9 +254,8 @@ export default function OutingPage() {
 	  bounds.extend(layer.getBounds())
     })
 
-    const overlap = intersectAll(polygons)
-    if (overlap) {
-	  const overlapLayer = L.geoJSON(overlap, {
+    if (overlapGeometry) {
+	  const overlapLayer = L.geoJSON(overlapGeometry, {
 		style: {
 		  color: "#166534",
 		  fillColor: "#22c55e",
@@ -258,7 +285,10 @@ export default function OutingPage() {
             <TimeOfDayControl
               id="outing-departure-time"
               value={departureTime}
-              onChange={setDepartureTime}
+              onChange={(value) => {
+                setDepartureTime(value)
+                clearGeneratedAreas()
+              }}
             />
           </div>
 
@@ -286,6 +316,7 @@ export default function OutingPage() {
               <button
                 type="button"
                 onClick={handleJoin}
+                disabled={isLoading}
                 className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
               >
                 Join
@@ -353,6 +384,17 @@ export default function OutingPage() {
             {isLoading ? "Generating..." : "Find common area"}
           </button>
 
+          {overlapMessage && (
+            <p
+              className={`rounded-lg px-3 py-2 text-sm ${
+                overlapGeometry ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"
+              }`}
+              role="status"
+            >
+              {overlapMessage}
+            </p>
+          )}
+
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         </aside>
 
@@ -362,27 +404,22 @@ export default function OutingPage() {
       </section>
     </main>
   )
+  function clearGeneratedAreas() {
+    setPolygons([])
+    setOverlapGeometry(null)
+    setOverlapMessage("")
+  }
 }
 
-function intersectAll(polygons: MemberPolygon[]) {
-	const features = polygons
-	  .filter((entry) => entry.geometry.coordinates.length > 0)
-	  .map((entry) => multiPolygon(entry.geometry.coordinates))
+function hasMemberLocation(member: OutingMember): boolean {
+  return Number.isFinite(member.latitude) && Number.isFinite(member.longitude)
+}
 
-  if (features.length < 2) {
-    return null
+function formatArea(areaKm2: number): string {
+  if (areaKm2 < 0.01) {
+    return `${Math.round(areaKm2 * 1_000_000).toLocaleString()} m²`
   }
-
-  let overlap = intersect(featureCollection([features[0], features[1]]))
-  for (let index = 2; overlap && index < features.length; index += 1) {
-    overlap = intersect(featureCollection([overlap, features[index]]))
-  }
-
-  if (!overlap || !["Polygon", "MultiPolygon"].includes(overlap.geometry.type)) {
-    return null
-  }
-
-  return overlap
+  return `${areaKm2.toFixed(areaKm2 < 10 ? 2 : 1)} km²`
 }
 
 function memberColor(index: number) {
