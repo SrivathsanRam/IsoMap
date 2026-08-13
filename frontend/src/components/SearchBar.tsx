@@ -328,6 +328,11 @@ export function SearchBar({
               onClear={() => onRoutePlaceClear("end")}
               onSelect={(place, queryText) => selectPlace(place, queryText, "end")}
             />
+            <TimeOfDayControl
+              id="route-departure-time"
+              value={isochroneDepartureTime}
+              onChange={onIsochroneDepartureTimeChange}
+            />
             <button
               type="button"
               className="route-submit"

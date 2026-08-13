@@ -23,9 +23,10 @@ type point struct {
 }
 
 type directionsRequest struct {
-	Start point  `json:"start"`
-	End   point  `json:"end"`
-	Mode  string `json:"mode"`
+	Start         point  `json:"start"`
+	End           point  `json:"end"`
+	Mode          string `json:"mode"`
+	DepartureTime string `json:"departure_time,omitempty"`
 }
 
 type directionsResponse struct {
@@ -33,11 +34,17 @@ type directionsResponse struct {
 }
 
 type routeOption struct {
-	Summary         string      `json:"summary"`
-	DurationSeconds int         `json:"duration_seconds"`
-	DistanceMeters  float64     `json:"distance_meters"`
-	Geometry        []point     `json:"geometry"`
-	Steps           []routeStep `json:"steps"`
+	Summary         string         `json:"summary"`
+	DurationSeconds int            `json:"duration_seconds"`
+	DistanceMeters  float64        `json:"distance_meters"`
+	Geometry        []point        `json:"geometry"`
+	Segments        []routeSegment `json:"segments"`
+	Steps           []routeStep    `json:"steps"`
+}
+
+type routeSegment struct {
+	Mode     string  `json:"mode"`
+	Geometry []point `json:"geometry"`
 }
 
 type routeStep struct {
@@ -91,8 +98,13 @@ func HandleDirections(w http.ResponseWriter, r *http.Request) {
 	if mode == "" {
 		mode = "transit"
 	}
+	departure, err := resolveDepartureTime(body.DepartureTime, time.Now())
+	if err != nil {
+		write(w, http.StatusBadRequest, "departure_time must use HH:mm in Singapore time")
+		return
+	}
 
-	routes, err := fetchRoutes(r, body.Start, body.End, mode)
+	routes, err := fetchRoutes(r, body.Start, body.End, mode, departure)
 	if err != nil {
 		write(w, http.StatusBadGateway, err.Error())
 		return
@@ -102,20 +114,8 @@ func HandleDirections(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(directionsResponse{Routes: routes})
 }
 
-func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeOption, error) {
-	query := url.Values{}
-	query.Set("start", formatPoint(start))
-	query.Set("end", formatPoint(end))
-	query.Set("routeType", oneMapRouteType(mode))
-
-	if oneMapRouteType(mode) == "pt" {
-		now := time.Now()
-		query.Set("date", now.Format("01-02-2006"))
-		query.Set("time", now.Format("15:04:05"))
-		query.Set("mode", "TRANSIT")
-		query.Set("maxWalkDistance", "1000")
-		query.Set("numItineraries", "3")
-	}
+func fetchRoutes(r *http.Request, start point, end point, mode string, departure time.Time) ([]routeOption, error) {
+	query := buildRouteQuery(start, end, mode, departure)
 
 	endpoint := "https://www.onemap.gov.sg/api/public/routingsvc/route?" + query.Encode()
 	data, err := fetchOneMapRoute(r.Context(), endpoint)
@@ -125,6 +125,49 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 	if data.Error != "" {
 		return nil, errors.New("OneMap routing request failed")
 	}
+	return buildRoutes(data, start, end, mode)
+}
+
+var singaporeTimeZone = time.FixedZone("Asia/Singapore", 8*60*60)
+
+func resolveDepartureTime(value string, now time.Time) (time.Time, error) {
+	singaporeNow := now.In(singaporeTimeZone)
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return singaporeNow, nil
+	}
+	clock, err := time.Parse("15:04", value)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Date(
+		singaporeNow.Year(), singaporeNow.Month(), singaporeNow.Day(),
+		clock.Hour(), clock.Minute(), 0, 0, singaporeTimeZone,
+	), nil
+}
+
+func buildRouteQuery(start point, end point, mode string, now time.Time) url.Values {
+	query := url.Values{}
+	query.Set("start", formatPoint(start))
+	query.Set("end", formatPoint(end))
+	routeType := oneMapRouteType(mode)
+	query.Set("routeType", routeType)
+
+	if routeType == "pt" {
+		// OneMap's public-transport router interprets these values in Singapore
+		// local time. Production servers commonly run in UTC, so formatting the
+		// server-local clock can otherwise query eight hours too early.
+		singaporeNow := now.In(singaporeTimeZone)
+		query.Set("date", singaporeNow.Format("01-02-2006"))
+		query.Set("time", singaporeNow.Format("15:04:05"))
+		query.Set("mode", "TRANSIT")
+		query.Set("maxWalkDistance", "1000")
+		query.Set("numItineraries", "3")
+	}
+	return query
+}
+
+func buildRoutes(data oneMapRouteResponse, start point, end point, mode string) ([]routeOption, error) {
 	if len(data.Plan.Itineraries) == 0 {
 		return nil, fmt.Errorf("OneMap returned no routes")
 	}
@@ -133,8 +176,8 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 	for _, itinerary := range data.Plan.Itineraries {
 		route := routeOption{
 			DurationSeconds: itinerary.Duration,
-			DistanceMeters:  itinerary.WalkDistance,
 			Geometry:        []point{},
+			Segments:        []routeSegment{},
 			Steps:           []routeStep{},
 		}
 
@@ -156,6 +199,12 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 					{Lat: leg.To.Lat, Lon: leg.To.Lon},
 				}
 			}
+			if len(points) > 0 {
+				route.Segments = append(route.Segments, routeSegment{
+					Mode:     strings.ToUpper(strings.TrimSpace(leg.Mode)),
+					Geometry: points,
+				})
+			}
 			route.Geometry = appendGeometry(route.Geometry, points)
 		}
 
@@ -163,10 +212,28 @@ func fetchRoutes(r *http.Request, start point, end point, mode string) ([]routeO
 			route.Geometry = []point{start, end}
 		}
 		route.Summary = summarize(route.Steps)
+		if oneMapRouteType(mode) == "pt" && !hasTransitLeg(route.Steps) {
+			// OneMap can include a pure-walking alternative in a PT response. Do
+			// not label or display it as a public-transport itinerary.
+			continue
+		}
 		routes = append(routes, route)
 	}
 
+	if len(routes) == 0 && oneMapRouteType(mode) == "pt" {
+		return nil, fmt.Errorf("OneMap returned no public transport routes for this journey")
+	}
 	return routes, nil
+}
+
+func hasTransitLeg(steps []routeStep) bool {
+	for _, step := range steps {
+		switch strings.ToUpper(strings.TrimSpace(step.Mode)) {
+		case "BUS", "RAIL", "SUBWAY", "TRAM", "FERRY", "TRANSIT":
+			return true
+		}
+	}
+	return false
 }
 
 func fetchOneMapRoute(ctx context.Context, endpoint string) (oneMapRouteResponse, error) {

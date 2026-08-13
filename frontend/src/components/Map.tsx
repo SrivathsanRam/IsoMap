@@ -39,6 +39,10 @@ type Point = {
 
 type RouteOption = RouteSummary & {
   geometry: Point[];
+  segments?: Array<{
+    mode: string;
+    geometry: Point[];
+  }>;
 };
 
 type DirectionsResponse = {
@@ -51,7 +55,7 @@ export function Map() {
   const markerRef = useRef<L.Marker | null>(null);
   const routeMarkersRef = useRef<L.Marker[]>([]);
   const polygonRef = useRef<L.GeoJSON | null>(null);
-  const routeRef = useRef<L.Polyline | null>(null);
+  const routeRef = useRef<L.FeatureGroup | null>(null);
   const presetLayerRef = useRef<L.LayerGroup | null>(null);
   const isochroneRequestRef = useRef(0);
   const routeRequestRef = useRef(0);
@@ -294,6 +298,7 @@ export function Map() {
           start: placeToPoint(routeSelection.start),
           end: placeToPoint(routeSelection.end),
           mode: "transit",
+          departure_time: isochroneDepartureTime,
         }),
       });
       if (!response.ok) {
@@ -355,19 +360,42 @@ export function Map() {
 
     clearMapLayers();
 
-    const line = route.geometry.map((point) => [point.lat, point.lon] as L.LatLngExpression);
-    routeRef.current = L.polyline(line, {
-      color: "#2563eb",
-      weight: 5,
-      opacity: 0.85,
-    }).addTo(map);
+    const routeLayer = L.featureGroup().addTo(map);
+    const drawableSegments = (route.segments ?? []).filter(
+      (segment) => segment.geometry.length >= 2,
+    );
+
+    if (drawableSegments.length > 0) {
+      drawableSegments.forEach((segment) => {
+        const mode = segment.mode.toUpperCase();
+        const isWalking = mode === "WALK";
+        L.polyline(
+          segment.geometry.map((point) => [point.lat, point.lon] as L.LatLngExpression),
+          {
+            color: isWalking ? "#64748b" : transitRouteColor(mode),
+            weight: isWalking ? 4 : 6,
+            opacity: isWalking ? 0.8 : 0.92,
+            dashArray: isWalking ? "7 7" : undefined,
+          },
+        ).addTo(routeLayer);
+      });
+    } else {
+      L.polyline(
+        route.geometry.map((point) => [point.lat, point.lon] as L.LatLngExpression),
+        { color: "#2563eb", weight: 5, opacity: 0.85 },
+      ).addTo(routeLayer);
+    }
+    routeRef.current = routeLayer;
 
     routeMarkersRef.current = [
       L.marker(placeToLatLng(start)).addTo(map),
       L.marker(placeToLatLng(end)).addTo(map),
     ];
 
-    map.fitBounds(routeRef.current.getBounds(), { padding: [40, 40] });
+    const bounds = routeLayer.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
   }
 
   function clearMapLayers() {
@@ -450,6 +478,22 @@ function calculateMultiPolygonAreaKm2(geometry: MultiPolygonGeometry) {
     const holes = polygon.slice(1).reduce((area, ring) => area + sphericalRingAreaKm2(ring), 0);
     return total + Math.max(0, exterior - holes);
   }, 0);
+}
+
+function transitRouteColor(mode: string): string {
+  switch (mode) {
+    case "BUS":
+      return "#2563eb";
+    case "SUBWAY":
+    case "RAIL":
+      return "#7c3aed";
+    case "TRAM":
+      return "#0891b2";
+    case "FERRY":
+      return "#0284c7";
+    default:
+      return "#2563eb";
+  }
 }
 
 function sphericalRingAreaKm2(points: [number, number][]) {
