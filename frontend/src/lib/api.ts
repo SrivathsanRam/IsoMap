@@ -1,4 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const mapboxAccessToken =
+  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const mapboxGeocodingURL = "https://api.mapbox.com/search/geocode/v6/forward";
 
 export type { IsochroneFeature, MultiPolygonGeometry } from "../../types";
 import type { IsochroneFeature } from "../../types";
@@ -36,6 +39,21 @@ export type Outing = {
 };
 
 export type Point = {
+  lat: number;
+  lon: number;
+};
+
+export type PlaceSearchResult = {
+  display_name: string;
+  lat: string;
+  lon: string;
+  primary_text?: string;
+  secondary_text?: string;
+  place_id?: string;
+  source?: string;
+};
+
+type SearchProximity = {
   lat: number;
   lon: number;
 };
@@ -193,6 +211,130 @@ export async function getIsochrone(point: Point, minutes: number, departureTime?
   }
 
   return (await response.json()) as IsochroneFeature;
+}
+
+export async function searchPlaces(
+  query: string,
+  signal: AbortSignal,
+  limit = 8,
+  proximity?: SearchProximity,
+): Promise<PlaceSearchResult[]> {
+  const normalizedLimit = Math.min(10, Math.max(1, Math.round(limit)));
+  const params = new URLSearchParams({
+    q: query.trim(),
+    limit: String(normalizedLimit),
+  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/places/search?${params}`, { signal });
+  } catch (error) {
+    if (signal.aborted || !mapboxAccessToken) {
+      throw error;
+    }
+    return searchPlacesWithMapbox(query, normalizedLimit, signal, proximity);
+  }
+
+  if (!response.ok) {
+    const data = (await response.json().catch(() => null)) as { message?: string } | null;
+    if (
+      mapboxAccessToken &&
+      [429, 502, 503, 504].includes(response.status)
+    ) {
+      return searchPlacesWithMapbox(query, normalizedLimit, signal, proximity);
+    }
+    throw new Error(data?.message ?? "Location search is temporarily unavailable.");
+  }
+
+  const data = (await response.json()) as {
+    places?: Array<Omit<PlaceSearchResult, "lat" | "lon"> & {
+      id?: string;
+      lat: string | number;
+      lon: string | number;
+    }>;
+  };
+  return (data.places ?? []).map(({ id, ...place }) => ({
+    ...place,
+    place_id: place.place_id ?? id,
+    lat: String(place.lat),
+    lon: String(place.lon),
+  }));
+}
+
+async function searchPlacesWithMapbox(
+  query: string,
+  limit: number,
+  signal: AbortSignal,
+  proximity?: SearchProximity,
+): Promise<PlaceSearchResult[]> {
+  if (!mapboxAccessToken) {
+    throw new Error("Location search is temporarily unavailable.");
+  }
+  const params = new URLSearchParams({
+    q: query.trim(),
+    access_token: mapboxAccessToken,
+    autocomplete: "true",
+    permanent: "true",
+    country: "sg",
+    language: "en",
+    bbox: "103.5935,1.1304,104.1076,1.4780",
+    limit: String(limit),
+  });
+  if (proximity && Number.isFinite(proximity.lat) && Number.isFinite(proximity.lon)) {
+    params.set("proximity", `${proximity.lon},${proximity.lat}`);
+  }
+
+  const response = await fetch(`${mapboxGeocodingURL}?${params}`, { signal });
+  if (!response.ok) {
+    throw new Error("Location search is temporarily unavailable.");
+  }
+
+  const data = (await response.json()) as {
+    features?: Array<{
+      id?: string;
+      geometry?: { coordinates?: [number, number] };
+      properties?: {
+        mapbox_id?: string;
+        name?: string;
+        name_preferred?: string;
+        full_address?: string;
+        place_formatted?: string;
+        coordinates?: {
+          routable_points?: Array<{ latitude?: number; longitude?: number }>;
+        };
+      };
+    }>;
+  };
+
+  return (data.features ?? []).flatMap((feature): PlaceSearchResult[] => {
+    const properties = feature.properties;
+    const routablePoint = properties?.coordinates?.routable_points?.find(
+      (candidate) =>
+        Number.isFinite(candidate.latitude) && Number.isFinite(candidate.longitude),
+    );
+    const longitude = routablePoint?.longitude ?? feature.geometry?.coordinates?.[0];
+    const latitude = routablePoint?.latitude ?? feature.geometry?.coordinates?.[1];
+    const primaryText = properties?.name_preferred || properties?.name;
+    const displayName = properties?.full_address || properties?.place_formatted || primaryText;
+    if (
+      !primaryText ||
+      !displayName ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
+      return [];
+    }
+
+    const mapboxID = properties?.mapbox_id || feature.id || `${latitude},${longitude}`;
+    return [{
+      display_name: displayName,
+      primary_text: primaryText,
+      secondary_text: displayName === primaryText ? undefined : displayName,
+      place_id: `mapbox:${mapboxID}`,
+      lat: String(latitude),
+      lon: String(longitude),
+      source: "mapbox",
+    }];
+  });
 }
 
 export type PresetSort = "new" | "top" | "trending";

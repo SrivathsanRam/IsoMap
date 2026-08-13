@@ -38,6 +38,7 @@ export interface IsochroneProperties {
   feed_version?: string;
   reached_stop_count: number;
   settled_node_count: number;
+  transit_used: boolean;
   grid_columns: number;
   grid_rows: number;
   walking_model: string;

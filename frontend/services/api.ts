@@ -54,8 +54,16 @@ class ApiService {
     return unwrap(response);
   }
 
-  async getIsochrone(point: Point, minutes: number): Promise<IsochroneFeature> {
-    const response = await this.client.post<IsochroneFeature>("/isochrone", { ...point, minutes });
+  async getIsochrone(
+    point: Point,
+    minutes: number,
+    departureTime?: string,
+  ): Promise<IsochroneFeature> {
+    const response = await this.client.post<IsochroneFeature>("/isochrone", {
+      ...point,
+      minutes,
+      ...(departureTime ? { departure_time: departureTime } : {}),
+    });
     return response.data;
   }
 

@@ -341,7 +341,12 @@ function CreatePresetModal({
         </label>
 
         <div className="preset-location-add">
-          <PlaceInput placeholder="Type an address or location" onSelect={setPendingPlace} />
+          <PlaceInput
+            placeholder="Type an address or location"
+            value={pendingPlace}
+            onClear={() => setPendingPlace(null)}
+            onSelect={setPendingPlace}
+          />
           <button type="button" onClick={addPendingPlace} disabled={!pendingPlace} title="Add location">
             <Plus size={18} />
           </button>

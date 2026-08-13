@@ -15,6 +15,10 @@ import {
   type PresetOverlay,
 } from "./PresetOverlaySidebar";
 import { getIsochrone, type MultiPolygonGeometry } from "../lib/api";
+import {
+  DEFAULT_ISOCHRONE_DEPARTURE_TIME,
+  toSingaporeDepartureRFC3339,
+} from "../lib/departureTime";
 
 const api = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const mapboxAccessToken =
@@ -50,6 +54,8 @@ export function Map() {
   const routeRef = useRef<L.Polyline | null>(null);
   const presetLayerRef = useRef<L.LayerGroup | null>(null);
   const isochroneRequestRef = useRef(0);
+  const routeRequestRef = useRef(0);
+  const departureRequestTimerRef = useRef<number | null>(null);
 
   const [mode, setMode] = useState<MapToolMode>("isochrone");
   const [routeSelection, setRouteSelection] = useState<Partial<{ start: Place; end: Place }>>({});
@@ -57,7 +63,12 @@ export function Map() {
   const [activeRouteIndex, setActiveRouteIndex] = useState(0);
   const [isochronePlace, setIsochronePlace] = useState<Place | null>(null);
   const [isochroneMinutes, setIsochroneMinutes] = useState(15);
+  const [isochroneDepartureTime, setIsochroneDepartureTime] = useState(
+    DEFAULT_ISOCHRONE_DEPARTURE_TIME,
+  );
+  const [searchProximity, setSearchProximity] = useState({ lat: 1.3521, lon: 103.8198 });
   const [isochroneAreaKm2, setIsochroneAreaKm2] = useState<number | null>(null);
+  const [isochroneTransitUsed, setIsochroneTransitUsed] = useState<boolean | null>(null);
   const [presets, setPresets] = useState<PresetOverlay[]>([]);
   const [activePresetIDs, setActivePresetIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,10 +95,20 @@ export function Map() {
     mapRef.current = map;
     presetLayerRef.current = L.layerGroup().addTo(map);
 
+    const updateSearchProximity = () => {
+      const center = map.getCenter();
+      setSearchProximity({ lat: center.lat, lon: center.lng });
+    };
+    map.on("moveend", updateSearchProximity);
+
     return () => {
+      map.off("moveend", updateSearchProximity);
       map.remove();
       mapRef.current = null;
       presetLayerRef.current = null;
+      if (departureRequestTimerRef.current !== null) {
+        window.clearTimeout(departureRequestTimerRef.current);
+      }
     };
   }, []);
 
@@ -125,27 +146,64 @@ export function Map() {
   }, [activePresetIDs, presets]);
 
   function changeMode(nextMode: MapToolMode) {
+    cancelScheduledDepartureRequest();
+    isochroneRequestRef.current += 1;
+    routeRequestRef.current += 1;
     setMode(nextMode);
     clearMapLayers();
     setRoutes([]);
     setIsochronePlace(null);
     setIsochroneAreaKm2(null);
+    setIsochroneTransitUsed(null);
+    setIsLoading(false);
     setError("");
   }
 
   async function selectIsochronePlace(place: Place) {
+    cancelScheduledDepartureRequest();
     setIsochronePlace(place);
-    await drawIsochrone(place, isochroneMinutes);
+    await drawIsochrone(place, isochroneMinutes, isochroneDepartureTime);
+  }
+
+  function clearIsochroneSelection() {
+    cancelScheduledDepartureRequest();
+    isochroneRequestRef.current += 1;
+    setIsochronePlace(null);
+    setIsochroneAreaKm2(null);
+    setIsochroneTransitUsed(null);
+    setIsLoading(false);
+    setError("");
+    clearMapLayers();
   }
 
   async function changeIsochroneMinutes(minutes: number) {
+    cancelScheduledDepartureRequest();
     setIsochroneMinutes(minutes);
     if (isochronePlace) {
-      await drawIsochrone(isochronePlace, minutes);
+      await drawIsochrone(isochronePlace, minutes, isochroneDepartureTime);
     }
   }
 
-  async function drawIsochrone(place: Place, minutes: number) {
+  function changeIsochroneDepartureTime(departureTime: string) {
+    setIsochroneDepartureTime(departureTime);
+    cancelScheduledDepartureRequest();
+    if (isochronePlace && departureTime) {
+      isochroneRequestRef.current += 1;
+      departureRequestTimerRef.current = window.setTimeout(() => {
+        departureRequestTimerRef.current = null;
+        void drawIsochrone(isochronePlace, isochroneMinutes, departureTime);
+      }, 350);
+    }
+  }
+
+  function cancelScheduledDepartureRequest() {
+    if (departureRequestTimerRef.current !== null) {
+      window.clearTimeout(departureRequestTimerRef.current);
+      departureRequestTimerRef.current = null;
+    }
+  }
+
+  async function drawIsochrone(place: Place, minutes: number, departureTime: string) {
     const requestID = isochroneRequestRef.current + 1;
     isochroneRequestRef.current = requestID;
 
@@ -159,11 +217,16 @@ export function Map() {
     clearMapLayers();
     setIsLoading(true);
     setError("");
+    setIsochroneTransitUsed(null);
     map.setView([lat, lon], 15);
     markerRef.current = L.marker([lat, lon]).addTo(map);
 
     try {
-      const feature = await getIsochrone({ lat, lon }, minutes);
+      const feature = await getIsochrone(
+        { lat, lon },
+        minutes,
+        toSingaporeDepartureRFC3339(departureTime),
+      );
       if (requestID !== isochroneRequestRef.current) {
         return;
       }
@@ -177,6 +240,7 @@ export function Map() {
         },
       }).addTo(map);
       setIsochroneAreaKm2(calculateMultiPolygonAreaKm2(feature.geometry));
+      setIsochroneTransitUsed(feature.properties.transit_used);
       const bounds = polygonRef.current.getBounds();
       if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [30, 30] });
@@ -193,10 +257,24 @@ export function Map() {
   }
 
   function changeRoutePlace(field: "start" | "end", place: Place) {
-    setRouteSelection((current) => ({ ...current, [field]: place }));
+    routeRequestRef.current += 1;
+    const nextSelection = { ...routeSelection, [field]: place };
+    setRouteSelection(nextSelection);
     setRoutes([]);
+    setIsLoading(false);
     setError("");
-    clearMapLayers();
+    showRouteSelection(nextSelection);
+  }
+
+  function clearRoutePlace(field: "start" | "end") {
+    routeRequestRef.current += 1;
+    const nextSelection = { ...routeSelection };
+    delete nextSelection[field];
+    setRouteSelection(nextSelection);
+    setRoutes([]);
+    setIsLoading(false);
+    setError("");
+    showRouteSelection(nextSelection);
   }
 
   async function submitRoute() {
@@ -204,6 +282,8 @@ export function Map() {
       return;
     }
 
+    const requestID = routeRequestRef.current + 1;
+    routeRequestRef.current = requestID;
     setIsLoading(true);
     setError("");
     try {
@@ -221,14 +301,42 @@ export function Map() {
       }
 
       const data = (await response.json()) as DirectionsResponse;
+      if (requestID !== routeRequestRef.current) {
+        return;
+      }
       setRoutes(data.routes);
       setActiveRouteIndex(0);
       drawRoute(data.routes[0], routeSelection.start, routeSelection.end);
     } catch (err) {
+      if (requestID !== routeRequestRef.current) {
+        return;
+      }
       setRoutes([]);
       setError(err instanceof Error ? err.message : "Could not load routes from OneMap.");
     } finally {
-      setIsLoading(false);
+      if (requestID === routeRequestRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }
+
+  function showRouteSelection(selection: Partial<{ start: Place; end: Place }>) {
+    const map = mapRef.current;
+    clearMapLayers();
+    if (!map) {
+      return;
+    }
+
+    const points = [selection.start, selection.end].filter(
+      (selected): selected is Place => selected !== undefined,
+    );
+    routeMarkersRef.current = points.map((selected) =>
+      L.marker(placeToLatLng(selected)).addTo(map),
+    );
+    if (points.length === 1) {
+      map.setView(placeToLatLng(points[0]), 15);
+    } else if (points.length > 1) {
+      map.fitBounds(L.latLngBounds(points.map(placeToLatLng)), { padding: [40, 40] });
     }
   }
 
@@ -292,16 +400,23 @@ export function Map() {
       <SearchBar
         mode={mode}
         routeSelection={routeSelection}
+        isochronePlace={isochronePlace}
+        searchProximity={searchProximity}
         isochroneAreaKm2={isochroneAreaKm2}
         isochroneMinutes={isochroneMinutes}
+        isochroneDepartureTime={isochroneDepartureTime}
+        isochroneTransitUsed={isochroneTransitUsed}
         routeResults={routes}
         activeRouteIndex={activeRouteIndex}
         isLoading={isLoading}
         error={error}
         onModeChange={changeMode}
         onIsochroneSelect={selectIsochronePlace}
+        onIsochroneClear={clearIsochroneSelection}
         onIsochroneMinutesChange={changeIsochroneMinutes}
+        onIsochroneDepartureTimeChange={changeIsochroneDepartureTime}
         onRoutePlaceChange={changeRoutePlace}
+        onRoutePlaceClear={clearRoutePlace}
         onRouteSubmit={submitRoute}
         onRouteSelect={selectRoute}
       />

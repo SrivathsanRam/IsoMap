@@ -1,44 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Bookmark, BookmarkCheck, CircleDot, History, Route } from "lucide-react";
 import { addressToPlace, placeToAddressRequest } from "../lib/placeAdapters";
 import { useRecentAddresses } from "../lib/useRecentAddresses";
 import { useSavedAddresses } from "../lib/useSavedAddresses";
+import { PlaceSearchInput, type Place } from "./PlaceSearchInput";
+import { TimeOfDayControl } from "./TimeOfDayControl";
 
-const mapboxAccessToken =
-  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-const mapboxSearchboxURL = "https://api.mapbox.com/search/searchbox/v1";
-const singaporeProximity = "103.8198,1.3521";
-
-export type Place = {
-  display_name: string;
-  lat: string;
-  lon: string;
-};
-
-type MapboxSuggestion = {
-  name: string;
-  name_preferred?: string;
-  mapbox_id: string;
-  full_address?: string;
-  place_formatted?: string;
-};
-
-type MapboxSuggestResponse = {
-  suggestions: MapboxSuggestion[];
-};
-
-type MapboxRetrieveResponse = {
-  features: {
-    geometry: {
-      coordinates: [number, number];
-    };
-    properties: {
-      name: string;
-      full_address?: string;
-      place_formatted?: string;
-    };
-  }[];
-};
+export { PlaceSearchInput as PlaceInput };
+export type { Place };
 
 export type MapToolMode = "isochrone" | "routing";
 
@@ -50,16 +19,23 @@ type RouteSelection = {
 type SearchBarProps = {
   mode: MapToolMode;
   routeSelection: Partial<RouteSelection>;
+  isochronePlace: Place | null;
+  searchProximity: { lat: number; lon: number };
   isochroneAreaKm2: number | null;
   isochroneMinutes: number;
+  isochroneDepartureTime: string;
+  isochroneTransitUsed: boolean | null;
   routeResults: RouteSummary[];
   activeRouteIndex: number;
   isLoading: boolean;
   error: string;
   onModeChange: (mode: MapToolMode) => void;
   onIsochroneSelect: (place: Place) => void;
+  onIsochroneClear: () => void;
   onIsochroneMinutesChange: (minutes: number) => void;
+  onIsochroneDepartureTimeChange: (departureTime: string) => void;
   onRoutePlaceChange: (field: keyof RouteSelection, place: Place) => void;
+  onRoutePlaceClear: (field: keyof RouteSelection) => void;
   onRouteSubmit: () => void;
   onRouteSelect: (index: number) => void;
 };
@@ -79,16 +55,23 @@ export type RouteSummary = {
 export function SearchBar({
   mode,
   routeSelection,
+  isochronePlace,
+  searchProximity,
   isochroneAreaKm2,
   isochroneMinutes,
+  isochroneDepartureTime,
+  isochroneTransitUsed,
   routeResults,
   activeRouteIndex,
   isLoading,
   error,
   onModeChange,
   onIsochroneSelect,
+  onIsochroneClear,
   onIsochroneMinutesChange,
+  onIsochroneDepartureTimeChange,
   onRoutePlaceChange,
+  onRoutePlaceClear,
   onRouteSubmit,
   onRouteSelect,
 }: SearchBarProps) {
@@ -107,24 +90,28 @@ export function SearchBar({
     isEnabled: canUseSaved,
   } = useSavedAddresses();
 
-  const [selectedIsoPlace, setSelectedIsoPlace] = useState<Place | null>(null);
   const [activePanel, setActivePanel] = useState<"recents" | "saved" | null>(null);
+  const [routeTargetField, setRouteTargetField] = useState<keyof RouteSelection>("start");
   const selectedIsoSaved =
-    selectedIsoPlace !== null &&
+    isochronePlace !== null &&
     isSaved(
-      Number(selectedIsoPlace.lat),
-      Number(selectedIsoPlace.lon),
-      selectedIsoPlace.display_name,
+      Number(isochronePlace.lat),
+      Number(isochronePlace.lon),
+      isochronePlace.display_name,
     );
 
-  function selectPlace(place: Place, queryText: string) {
+  function selectPlace(
+    place: Place,
+    queryText: string,
+    explicitRouteField?: keyof RouteSelection,
+  ) {
     addRecent(placeToAddressRequest(place, queryText));
 
     if (mode === "isochrone") {
-      setSelectedIsoPlace(place);
       onIsochroneSelect(place);
     } else {
-      const field: keyof RouteSelection = routeSelection.start ? "end" : "start";
+      const field = explicitRouteField ?? routeTargetField;
+      setRouteTargetField(field === "start" ? "end" : "start");
       onRoutePlaceChange(field, place);
     }
 
@@ -244,19 +231,22 @@ export function SearchBar({
 
       {mode === "isochrone" ? (
         <>
-          <PlaceInput
+          <PlaceSearchInput
             placeholder="Search Singapore"
+            value={isochronePlace}
+            proximity={searchProximity}
+            onClear={onIsochroneClear}
             onSelect={(place, queryText) => selectPlace(place, queryText)}
           />
 
-          {selectedIsoPlace && (
+          {isochronePlace && (
             <div className="selected-place-row">
-              <p className="selected-place-name">{selectedIsoPlace.display_name}</p>
+              <p className="selected-place-name">{isochronePlace.display_name}</p>
               <button
                 type="button"
                 className="save-place-button"
                 disabled={!canUseSaved || isSaving || selectedIsoSaved}
-                onClick={() => savePlace(placeToAddressRequest(selectedIsoPlace))}
+                onClick={() => savePlace(placeToAddressRequest(isochronePlace))}
               >
                 {selectedIsoSaved ? (
                   <>
@@ -270,9 +260,15 @@ export function SearchBar({
               </button>
             </div>
           )}
-          {selectedIsoPlace && !canUseSaved && (
+          {isochronePlace && !canUseSaved && (
             <p className="map-panel-message">Sign in to save this place to the database.</p>
           )}
+
+          <TimeOfDayControl
+            id="isochrone-departure-time"
+            value={isochroneDepartureTime}
+            onChange={onIsochroneDepartureTimeChange}
+          />
 
           <div className="isochrone-slider">
             <div className="isochrone-slider-header">
@@ -305,6 +301,10 @@ export function SearchBar({
                   <dt>Area</dt>
                   <dd>{formatArea(isochroneAreaKm2)}</dd>
                 </div>
+                <div>
+                  <dt>Network</dt>
+                  <dd>{isochroneTransitUsed ? "Transit + walking" : "Walking only"}</dd>
+                </div>
               </dl>
             </div>
           )}
@@ -312,13 +312,21 @@ export function SearchBar({
       ) : (
         <>
           <div className="route-inputs">
-            <PlaceInput
+            <PlaceSearchInput
               placeholder="Start location"
-              onSelect={(place, queryText) => selectPlace(place, queryText)}
+              value={routeSelection.start ?? null}
+              proximity={searchProximity}
+              onFocus={() => setRouteTargetField("start")}
+              onClear={() => onRoutePlaceClear("start")}
+              onSelect={(place, queryText) => selectPlace(place, queryText, "start")}
             />
-            <PlaceInput
+            <PlaceSearchInput
               placeholder="End location"
-              onSelect={(place, queryText) => selectPlace(place, queryText)}
+              value={routeSelection.end ?? null}
+              proximity={searchProximity}
+              onFocus={() => setRouteTargetField("end")}
+              onClear={() => onRoutePlaceClear("end")}
+              onSelect={(place, queryText) => selectPlace(place, queryText, "end")}
             />
             <button
               type="button"
@@ -360,157 +368,6 @@ export function SearchBar({
       )}
     </aside>
   );
-}
-
-export function PlaceInput({
-  placeholder,
-  onSelect,
-}: {
-  placeholder: string;
-  onSelect: (place: Place, queryText: string) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<MapboxSuggestion[]>([]);
-  const sessionTokenRef = useRef(newSessionToken());
-  const selectedQueryRef = useRef("");
-
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      return;
-    }
-    if (query === selectedQueryRef.current) {
-      return;
-    }
-    if (!mapboxAccessToken) {
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({
-          q: query.trim(),
-          session_token: sessionTokenRef.current,
-          proximity: singaporeProximity,
-          country: "SG",
-          language: "en",
-          limit: "8",
-          access_token: mapboxAccessToken,
-        });
-        const response = await fetch(`${mapboxSearchboxURL}/suggest?${params}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error("Could not load suggestions.");
-        }
-        const data = (await response.json()) as MapboxSuggestResponse;
-        setSuggestions(data.suggestions ?? []);
-      } catch {
-        if (!controller.signal.aborted) {
-          setSuggestions([]);
-        }
-      }
-    }, 300);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(timeout);
-    };
-  }, [query]);
-
-  function changeQuery(value: string) {
-    selectedQueryRef.current = "";
-    setQuery(value);
-    if (value.trim().length < 2) {
-      setSuggestions([]);
-    }
-  }
-
-  async function select(suggestion: MapboxSuggestion) {
-    if (!mapboxAccessToken) {
-      return;
-    }
-
-    const submittedQuery = query.trim();
-    const params = new URLSearchParams({
-      session_token: sessionTokenRef.current,
-      access_token: mapboxAccessToken,
-    });
-    const response = await fetch(
-      `${mapboxSearchboxURL}/retrieve/${encodeURIComponent(suggestion.mapbox_id)}?${params}`,
-    );
-    if (!response.ok) {
-      setSuggestions([]);
-      return;
-    }
-
-    const data = (await response.json()) as MapboxRetrieveResponse;
-    const feature = data.features[0];
-    if (!feature) {
-      setSuggestions([]);
-      return;
-    }
-
-    const [lon, lat] = feature.geometry.coordinates;
-    const displayName = primarySuggestionLabel({
-      name: feature.properties.name,
-      full_address: feature.properties.full_address,
-      place_formatted: feature.properties.place_formatted,
-      mapbox_id: suggestion.mapbox_id,
-    });
-    const place = {
-      display_name: displayName,
-      lat: String(lat),
-      lon: String(lon),
-    };
-
-    selectedQueryRef.current = displayName;
-    setQuery(place.display_name);
-    setSuggestions([]);
-    sessionTokenRef.current = newSessionToken();
-    onSelect(place, submittedQuery);
-  }
-
-  return (
-    <div className="place-input">
-      <input
-        value={query}
-        onChange={(event) => changeQuery(event.target.value)}
-        placeholder={placeholder}
-      />
-      {suggestions.length > 0 && (
-        <ul>
-          {suggestions.map((suggestion) => (
-            <li key={suggestion.mapbox_id}>
-              <button type="button" onClick={() => select(suggestion)}>
-                <strong>{primarySuggestionLabel(suggestion)}</strong>
-                {secondarySuggestionLabel(suggestion) && (
-                  <span>{secondarySuggestionLabel(suggestion)}</span>
-                )}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function newSessionToken() {
-  return crypto.randomUUID();
-}
-
-function primarySuggestionLabel(suggestion: MapboxSuggestion) {
-  return suggestion.name_preferred || suggestion.name;
-}
-
-function secondarySuggestionLabel(suggestion: MapboxSuggestion) {
-  const primary = primarySuggestionLabel(suggestion);
-  const secondary = suggestion.full_address || suggestion.place_formatted;
-  if (!secondary || secondary === primary) {
-    return "";
-  }
-  return secondary;
 }
 
 function formatDuration(seconds: number) {

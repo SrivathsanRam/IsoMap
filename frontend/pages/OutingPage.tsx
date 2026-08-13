@@ -6,6 +6,12 @@ import { featureCollection, multiPolygon } from "@turf/helpers"
 import intersect from "@turf/intersect"
 
 import {
+  DEFAULT_ISOCHRONE_DEPARTURE_TIME,
+  toSingaporeDepartureRFC3339,
+} from "../src/lib/departureTime"
+import { TimeOfDayControl } from "../src/components/TimeOfDayControl"
+import { PlaceSearchInput, type Place } from "../src/components/PlaceSearchInput"
+import {
   getIsochrone,
   getOuting,
   joinOuting,
@@ -15,30 +21,29 @@ import {
   type MultiPolygonGeometry,
 } from "../src/lib/api"
 
-type Place = {
-  display_name: string
-  lat: string
-  lon: string
-}
-
 type MemberPolygon = {
   memberId: string
   geometry: MultiPolygonGeometry
 }
 
 const singapore: L.LatLngExpression = [1.3521, 103.8198]
+const mapboxAccessToken =
+  import.meta.env.MAPBOX_ACCESS_TOKEN ?? import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
 export default function OutingPage() {
   const { token = "" } = useParams()
   const mapElementRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const layerGroupRef = useRef<L.LayerGroup | null>(null)
+  const locationMarkerRef = useRef<L.CircleMarker | null>(null)
 
   const [outing, setOuting] = useState<Outing | null>(null)
   const [currentMember, setCurrentMember] = useState<OutingMember | null>(null)
   const [displayName, setDisplayName] = useState("")
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [minutes, setMinutes] = useState(15)
+  const [departureTime, setDepartureTime] = useState(DEFAULT_ISOCHRONE_DEPARTURE_TIME)
+  const [searchProximity, setSearchProximity] = useState({ lat: 1.3521, lon: 103.8198 })
   const [polygons, setPolygons] = useState<MemberPolygon[]>([])
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -51,16 +56,37 @@ export default function OutingPage() {
     }
 
     const map = L.map(mapElementRef.current).setView(singapore, 12)
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map)
+    if (mapboxAccessToken) {
+      L.tileLayer(
+        `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`,
+        {
+          attribution:
+            '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+          tileSize: 512,
+          zoomOffset: -1,
+        },
+      ).addTo(map)
+    } else {
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map)
+    }
     layerGroupRef.current = L.layerGroup().addTo(map)
     mapRef.current = map
 
+    const updateSearchProximity = () => {
+      const center = map.getCenter()
+      setSearchProximity({ lat: center.lat, lon: center.lng })
+    }
+    map.on("moveend", updateSearchProximity)
+
     return () => {
+      map.off("moveend", updateSearchProximity)
       map.remove()
       mapRef.current = null
       layerGroupRef.current = null
+      locationMarkerRef.current = null
     }
   }, [])
 
@@ -123,6 +149,30 @@ export default function OutingPage() {
     }
   }
 
+  function selectLocation(place: Place) {
+    setSelectedPlace(place)
+    const map = mapRef.current
+    if (!map) {
+      return
+    }
+    const position: L.LatLngExpression = [Number(place.lat), Number(place.lon)]
+    locationMarkerRef.current?.remove()
+    locationMarkerRef.current = L.circleMarker(position, {
+      radius: 8,
+      color: "#1d4ed8",
+      fillColor: "#3b82f6",
+      fillOpacity: 0.9,
+      weight: 3,
+    }).addTo(map)
+    map.setView(position, 16)
+  }
+
+  function clearLocation() {
+    setSelectedPlace(null)
+    locationMarkerRef.current?.remove()
+    locationMarkerRef.current = null
+  }
+
   async function generateOverlap() {
     if (!outing) {
       return
@@ -142,6 +192,7 @@ export default function OutingPage() {
           geometry: (await getIsochrone(
             { lat: Number(member.latitude), lon: Number(member.longitude) },
             member.max_travel_minutes,
+            toSingaporeDepartureRFC3339(departureTime),
           )).geometry,
         })),
       )
@@ -203,6 +254,14 @@ export default function OutingPage() {
             <h1 className="text-2xl font-semibold text-slate-950">{outing?.title ?? "Group outing"}</h1>
             <p className="mt-1 text-sm text-slate-500">Share this link so others can join.</p>
           </div>
+          <div className="outing-time-control rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <TimeOfDayControl
+              id="outing-departure-time"
+              value={departureTime}
+              onChange={setDepartureTime}
+            />
+          </div>
+
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(joinUrl)}
@@ -238,7 +297,13 @@ export default function OutingPage() {
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <h2 className="font-medium text-slate-950">Your location</h2>
               <div className="mt-3 grid gap-3">
-                <PlaceSearch onSelect={setSelectedPlace} />
+                <PlaceSearchInput
+                  placeholder="Search your location"
+                  value={selectedPlace}
+                  proximity={searchProximity}
+                  onClear={clearLocation}
+                  onSelect={selectLocation}
+                />
                 <label className="grid gap-2 text-sm text-slate-600">
                   Max travel time: <strong>{minutes} min</strong>
                   <input
@@ -296,71 +361,6 @@ export default function OutingPage() {
         </div>
       </section>
     </main>
-  )
-}
-
-function PlaceSearch({ onSelect }: { onSelect: (place: Place) => void }) {
-  const [query, setQuery] = useState("")
-  const [places, setPlaces] = useState<Place[]>([])
-
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setPlaces([])
-      return
-    }
-
-    const controller = new AbortController()
-    const timeout = window.setTimeout(async () => {
-      const params = new URLSearchParams({
-        q: query,
-        format: "jsonv2",
-        "accept-language": "en",
-        bounded: "1",
-        countrycodes: "sg",
-        limit: "6",
-        viewbox: "103.5935,1.4756,104.1076,1.1304",
-      })
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-        signal: controller.signal,
-      })
-      setPlaces(await response.json())
-    }, 300)
-
-    return () => {
-      controller.abort()
-      window.clearTimeout(timeout)
-    }
-  }, [query])
-
-  function select(place: Place) {
-    setQuery(place.display_name)
-    setPlaces([])
-    onSelect(place)
-  }
-
-  return (
-    <div className="relative">
-      <input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search your location"
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-      />
-      {places.length > 0 && (
-        <div className="absolute z-[1000] mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-          {places.map((place) => (
-            <button
-              key={`${place.lat}-${place.lon}-${place.display_name}`}
-              type="button"
-              onClick={() => select(place)}
-              className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-            >
-              {place.display_name}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
   )
 }
 
